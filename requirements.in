@@ -1,0 +1,10 @@
+# Dependencias del bloque de ingesta y soporte de los módulos de plantilla.
+flit_core>=3.2,<4
+pandas>=2.2,<3
+pyarrow>=18,<24
+requests>=2.32,<3
+loguru>=0.7,<1
+python-dotenv>=1,<2
+tqdm>=4.66,<5
+typer>=0.15,<1
+pytest>=8,<10
