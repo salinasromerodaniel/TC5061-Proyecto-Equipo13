@@ -1,0 +1,24 @@
+{
+  "generator": "cookiecutter-data-science",
+  "generator_version": "2.3.0",
+  "template_url": "https://github.com/drivendataorg/cookiecutter-data-science",
+  "template_tag": "v2.3.0",
+  "template_commit": "0f6b163cdbe3918a2c65ab57ad9fefda93976d9e",
+  "options": {
+    "project_name": "Proyecto MiBici — Equipo 13",
+    "repo_name": "TC5061-Proyecto-Equipo13",
+    "module_name": "mibici",
+    "author_name": "Daniel Salinas Romero y equipo 13",
+    "description": "Propuesta y base reproducible de Machine Learning para MiBici — TC5061, equipo 13.",
+    "python_version_number": "3.12",
+    "dataset_storage": "none (default)",
+    "environment_manager": "virtualenv",
+    "dependency_file": "requirements.txt",
+    "pydata_packages": "basic",
+    "testing_framework": "none",
+    "linting_and_formatting": "ruff",
+    "open_source_license": "No license file",
+    "docs": "none",
+    "include_code_scaffold": "Yes"
+  }
+}
