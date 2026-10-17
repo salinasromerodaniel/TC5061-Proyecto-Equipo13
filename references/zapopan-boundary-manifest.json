@@ -1,0 +1,13 @@
+{
+  "bytes": 94133,
+  "coordinate_order": "longitude_latitude",
+  "documentation_url": "https://www.inegi.org.mx/servicios/catalogounico.html",
+  "geometry_type": "MultiPolygon",
+  "municipality_code": "14120",
+  "municipality_name": "Zapopan",
+  "selection": "polygon_covers_point",
+  "sha256": "b7b9207074bc0dbe807a43eceb6f02dafb6a8c1ede27484c05fec073e0d6fabe",
+  "source": "INEGI, Servicio Web del Catálogo Único de Claves Geoestadísticas",
+  "temporal_policy": "reference_snapshot_not_historical_boundaries",
+  "url": "https://gaia.inegi.org.mx/wscatgeo/v2/geo/mgem/14120"
+}
