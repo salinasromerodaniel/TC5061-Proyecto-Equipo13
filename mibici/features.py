@@ -47,7 +47,7 @@ def full_weeks(months):
 def p1_station_week_panel(counts, station_ids, months,
                           validation_weeks=config.P1_VALIDATION_WEEKS,
                           test_weeks=config.P1_TEST_WEEKS,
-                          history_weeks=config.P1_HISTORY_WEEKS):
+                          history_weeks=config.P1_HISTORY_WEEKS, cohort_start_month=None):
     """Construir cohorte histórica y retardos sin usar observaciones de la semana objetivo.
 
     La cohorte se fija con estaciones que ya tienen salidas antes de validación.
@@ -64,7 +64,15 @@ def p1_station_week_panel(counts, station_ids, months,
     test_start = weeks[-test_weeks]
     selected = counts[counts.station_id.isin(station_ids) & counts.week_start.isin(weeks)].copy()
     past = selected[(selected.week_start < validation_start) & (selected.departures > 0)]
-    first_seen = past.groupby("station_id").week_start.min()
+    if cohort_start_month is not None:
+        cohort_start = pd.Period(cohort_start_month, freq="M").start_time
+        cohort_start += pd.Timedelta(days=(-cohort_start.dayofweek) % 7)
+        recent = past[past.week_start >= cohort_start]
+    else:
+        cohort_start = weeks[0]
+        recent = past
+    recent_first_seen = recent.groupby("station_id").week_start.min()
+    first_seen = past[past.station_id.isin(recent_first_seen.index)].groupby("station_id").week_start.min()
     if first_seen.empty:
         raise DataError("No hay estaciones de Zapopan con historia de entrenamiento.")
     pieces = []
@@ -75,6 +83,9 @@ def p1_station_week_panel(counts, station_ids, months,
                               "departures": history.reindex(station_weeks, fill_value=0).to_numpy()})
         frame["station_id"] = int(station_id)
         frame["lag_1"] = frame.departures.shift(1)
+        frame["lag_52"] = frame.departures.shift(config.P1_SEASONAL_WEEKS)
+        frame["evaluation_eligible_from"] = (recent_first_seen.loc[station_id]
+                                             + pd.Timedelta(weeks=history_weeks))
         frame[f"mean_previous_{history_weeks}"] = (frame.departures.shift(1)
                                                    .rolling(history_weeks, min_periods=history_weeks).mean())
         pieces.append(frame)
@@ -84,6 +95,8 @@ def p1_station_week_panel(counts, station_ids, months,
     panel["split"] = "train"
     panel.loc[panel.week_start >= validation_start, "split"] = "validation"
     panel.loc[panel.week_start >= test_start, "split"] = "test"
+    panel = panel[(panel.split == "train") | (panel.week_start >= panel.evaluation_eligible_from)].copy()
+    panel = panel.drop(columns="evaluation_eligible_from")
     if any(not (panel.split == split).any() for split in ("train", "validation", "test")):
         raise DataError("Una partición no tiene ejemplos tras requerir historia suficiente.")
     panel = panel.sort_values(["week_start", "station_id"]).reset_index(drop=True)
@@ -100,5 +113,6 @@ def p1_station_week_panel(counts, station_ids, months,
                 "weeks_by_split": panel.groupby("split").week_start.nunique().astype(int).to_dict(),
                 "target": "observed_started_trips", "horizon_days": 7,
                 "evaluation_protocol": "weekly_rolling_origin_prior_observations_available",
-                "cohort_policy": "observed_departures_in_training_only"}
+                "cohort_policy": "observed_departures_in_recent_training_only",
+                "cohort_observation_start": cohort_start.date().isoformat()}
     return panel, metadata

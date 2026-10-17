@@ -118,3 +118,27 @@ def test_weekly_aggregation_reads_only_operational_fields(tmp_path):
     assert result.departures.sum() == 3
     assert result.columns.tolist() == ["station_id", "week_start", "departures"]
     assert set(result.week_start) == {pd.Timestamp("2026-08-31"), pd.Timestamp("2026-09-07")}
+
+
+def test_two_years_keep_recent_cohort_and_same_validation_test_rows():
+    long_months = pd.period_range("2024-10", "2026-09", freq="M").astype(str).tolist()
+    long_weeks = full_weeks(long_months)
+    history = pd.DataFrame({"station_id": 1, "week_start": long_weeks,
+                            "departures": np.arange(1, len(long_weeks) + 1)})
+    old_only = history[history.week_start < "2025-10-01"].copy()
+    old_only["station_id"] = 2
+    combined = pd.concat([history, old_only], ignore_index=True)
+    short = history[history.week_start >= "2025-10-01"]
+    yearly, _ = p1_station_week_panel(short, [1, 2], MONTHS)
+    extended, metadata = p1_station_week_panel(combined, [1, 2], long_months,
+                                              cohort_start_month="2025-10")
+    assert set(extended.station_id) == {1}
+    assert metadata["weeks_by_split"]["train"] > 31
+    pd.testing.assert_frame_equal(
+        yearly[yearly.split != "train"][["station_id", "week_start", "lag_1", "mean_previous_4"]].reset_index(drop=True),
+        extended[extended.split != "train"][["station_id", "week_start", "lag_1", "mean_previous_4"]].reset_index(drop=True))
+
+
+def test_seasonal_baseline_uses_past_or_explicit_fallback():
+    panel = pd.DataFrame({"lag_1": [10, 20], "lag_52": [5, np.nan]})
+    assert baseline_predictions(panel, "seasonal_52_weeks").tolist() == [5, 20]

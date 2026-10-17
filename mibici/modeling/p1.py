@@ -15,7 +15,7 @@ from mibici.dataset import DataError, read_manifest, verify_manifest
 from mibici.features import p1_station_week_panel, weekly_departures
 from mibici.geography import load_boundary, municipality_station_ids
 
-BASELINES = ("previous_week", "mean_previous_weeks")
+BASELINES = ("previous_week", "mean_previous_weeks", "seasonal_52_weeks")
 
 
 def baseline_predictions(panel, name, history_weeks=config.P1_HISTORY_WEEKS):
@@ -24,6 +24,8 @@ def baseline_predictions(panel, name, history_weeks=config.P1_HISTORY_WEEKS):
         return panel.lag_1.to_numpy(dtype=float)
     if name == "mean_previous_weeks":
         return panel[f"mean_previous_{history_weeks}"].to_numpy(dtype=float)
+    if name == "seasonal_52_weeks":
+        return panel.lag_52.fillna(panel.lag_1).to_numpy(dtype=float)
     raise DataError(f"Baseline desconocido: {name}.")
 
 
@@ -84,7 +86,7 @@ def plot_predictions(predictions, baseline_name, figure_dir):
 def run_p1(manifest_path=config.P1_DATA_MANIFEST, data_dir=config.DATA_DIR,
            boundary_manifest=config.P1_BOUNDARY_MANIFEST, tracking_uri=None,
            experiment_name=config.P1_EXPERIMENT, report_dir=config.P1_REPORT_DIR):
-    """Ejecutar y registrar dos baselines; integrable desde el orquestador del equipo."""
+    """Ejecutar y registrar tres baselines; integrable desde el orquestador del equipo."""
     import mlflow
 
     manifest_path, data_dir, report_dir = Path(manifest_path), Path(data_dir), Path(report_dir)
@@ -95,7 +97,8 @@ def run_p1(manifest_path=config.P1_DATA_MANIFEST, data_dir=config.DATA_DIR,
     stations = pd.read_parquet(data_dir / "processed" / "stations.parquet")
     station_ids = municipality_station_ids(stations, geometry)
     counts = weekly_departures(manifest, data_dir)
-    panel, split_metadata = p1_station_week_panel(counts, station_ids, manifest["months"])
+    panel, split_metadata = p1_station_week_panel(
+        counts, station_ids, manifest["months"], cohort_start_month=config.P1_COHORT_START_MONTH)
     unknown = counts[~counts.station_id.isin(stations.station_id)]
     split_metadata["origin_ids_missing_from_catalog"] = sorted(int(i) for i in unknown.station_id.unique())
     split_metadata["starts_missing_origin_coordinates"] = int(unknown.departures.sum())
@@ -119,11 +122,18 @@ def run_p1(manifest_path=config.P1_DATA_MANIFEST, data_dir=config.DATA_DIR,
             frame = predictions[predictions.split == split]
             metrics.update({f"{split}_{k}": v for k, v in
                             regression_metrics(frame.departures, frame.prediction).items()})
+        if baseline == "seasonal_52_weeks":
+            for split in ("train", "validation", "test"):
+                metrics[f"{split}_seasonal_fallback_fraction"] = float(
+                    panel.loc[panel.split == split, "lag_52"].isna().mean())
         artifact = plot_predictions(predictions, baseline, figure_dir)
         prediction_path = prediction_dir / f"{baseline}_predictions.parquet"
         predictions.to_parquet(prediction_path, index=False)
         params = {"model": baseline, "history_weeks": config.P1_HISTORY_WEEKS,
                   "horizon_days": 7, "forecast_origin": "monday_00_source_time",
+                  "seasonal_weeks": config.P1_SEASONAL_WEEKS,
+                  "seasonal_fallback": "previous_week",
+                  "cohort_observation_start": split_metadata["cohort_observation_start"],
                   "data_start_month": manifest["months"][0],
                   "data_end_month": manifest["months"][-1],
                   "data_version": manifest["data_version"], "seed": config.RANDOM_SEED,

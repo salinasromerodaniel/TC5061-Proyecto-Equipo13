@@ -145,7 +145,8 @@ def datetime_column(series, name):
     source = series.astype("string").str.strip()
     parsed = pd.Series(pd.NaT, index=series.index, dtype="datetime64[ns]")
     for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f",
-                "%Y-%m-%dT%H:%M:%S", "%d/%m/%Y %H:%M:%S"):
+                "%Y-%m-%dT%H:%M:%S", "%d/%m/%Y %H:%M:%S",
+                "%d/%m/%Y %H:%M", "%Y-%m-%d %H:%M"):
         missing = parsed.isna()
         parsed.loc[missing] = pd.to_datetime(source.loc[missing], format=fmt, errors="coerce")
     if parsed.isna().any():
