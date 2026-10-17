@@ -189,3 +189,28 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# MiBici: experimentos, modelos y secretos
+mlruns/
+mlartifacts/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+.env.*
+!.env.example
+/models/*
+!/models/.gitkeep
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+*.h5
+*.keras
+*.pt
+*.pth
+# Evitar datos de viajes incluso fuera de data/
+datos_abiertos_*.csv
+nomenclatura_*.csv
+*.parquet
