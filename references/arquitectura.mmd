@@ -1,0 +1,13 @@
+flowchart LR
+  csv["mibici: viajes y catálogo CSV"] --> ingest["mibici.dataset: descarga, normalización y hashes"]
+  ingest --> data[("data/processed: Parquet local")]
+  ingest --> manifest["references: manifiestos versionados"]
+  inegi["inegi: GeoJSON de Zapopan"] --> geo["mibici.geography: punto en polígono"]
+  data --> features["mibici.features: estación-semana y retardos"]
+  geo --> features
+  features --> p1["mibici.modeling.p1: baselines y evaluación temporal"]
+  p1 --> tracking["mlflow: SQLite y artefactos locales"]
+  p1 --> reports["reports: métricas y figuras"]
+  features -. "integración prevista" .-> others["p2 y p3: pendientes de sus responsables"]
+  classDef pending stroke-dasharray:5 5,fill:#f4f4f4;
+  class others pending;

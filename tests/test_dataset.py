@@ -212,3 +212,8 @@ def test_download_hash_mismatch_preserves_previous_file(tmp_path):
     with pytest.raises(ds.DataError, match="local"):
         ds.download(Session(), "https://example.invalid/data.csv", target, "0" * 64)
     assert target.read_bytes() == b"altered cache"
+
+
+def test_historical_day_first_minute_precision():
+    result = ds.datetime_column(pd.Series(["01/10/2024 0:00", "31/10/2024 23:59"]), "date")
+    assert result.tolist() == [pd.Timestamp("2024-10-01 00:00"), pd.Timestamp("2024-10-31 23:59")]
