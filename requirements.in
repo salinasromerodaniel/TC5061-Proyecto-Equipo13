@@ -1,0 +1,19 @@
+# Dependencias del bloque de ingesta y soporte de los módulos de plantilla.
+flit_core>=3.2,<4
+pandas>=2.2,<3
+pyarrow>=18,<24
+requests>=2.32,<3
+loguru>=0.7,<1
+python-dotenv>=1,<2
+tqdm>=4.66,<5
+typer>=0.15,<1
+pytest>=8,<10
+
+# Evaluación, figuras y tracking de P1
+scikit-learn>=1.6,<2
+matplotlib>=3.9,<4
+mlflow>=3.1,<4
+shapely>=2,<3
+
+# Evitar avisos de aritmética temporal de pandas 2.3 con NumPy 2.5.
+numpy>=2,<2.4
