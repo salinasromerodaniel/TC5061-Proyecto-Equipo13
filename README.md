@@ -14,9 +14,9 @@ La formulación inicial propone estaciones de Zapopan y horizonte semanal para P
 
 ## Estado
 
-Ingesta implementada y probada con septiembre de 2026: 490,056 filas originales, 758 duplicados operativos removidos y **489,298 viajes limpios**, 468 estaciones utilizadas y 484 registros en el catálogo. No hubo IDs de estación ausentes del catálogo.
+Ingesta automática, normalización, Parquet y manifiestos implementados. Periodo de P1: octubre de 2024–septiembre de 2026, con **9,043,167 viajes limpios de toda la red** (758 duplicados removidos). El filtro geográfico de Zapopan usa el polígono oficial INEGI y el catálogo de septiembre de 2026; 826,486 inicios quedan asociados a estaciones dentro del polígono de referencia.
 
-Esta ejecución verifica el bloque de ingesta; un mes todavía no cubre el alcance de millones de registros ni fija el periodo final del proyecto. Conservamos toda la red: el filtro de Zapopan, la partición temporal y la aproximación de riesgo de P2 siguen pendientes. Variables, modelos, MLflow y notebook exploratorio siguen sin implementar; los módulos correspondientes aún son ejemplos.
+P1 compara persistencia, media de cuatro semanas y un baseline estacional de 52 semanas. La prueba usa las mismas 78 estaciones de la cohorte histórica y los mismos ejemplos para los tres modelos. Persistencia fue elegida por validación: MAE de prueba **17.37 viajes por estación-semana**. Datos, partición, límites y resultados en [references/P1.md](references/P1.md). P2, P3, su integración común y el notebook exploratorio siguen a cargo de sus responsables.
 
 ## Estructura
 
@@ -24,11 +24,12 @@ Esta ejecución verifica el bloque de ingesta; un mes todavía no cubre el alcan
 mibici/
   config.py             # Configuración y rutas
   dataset.py            # Ingesta, verificación y reproducción
-  features.py           # Pendiente: variables reutilizables
+  features.py           # Agregaciones y variables históricas de P1
   modeling/
-    train.py            # Pendiente: baselines y MLflow
+    train.py            # Pendiente: orquestación común P1/P2/P3
     predict.py          # Plantilla
-  plots.py              # Plantilla de visualización
+    p1.py               # Baselines P1, evaluación y MLflow
+  plots.py              # Diagrama de arquitectura
 data/                   # Datos locales, excluidos de Git
 models/                 # Modelos locales, excluidos de Git
 notebooks/              # Exploración
@@ -51,7 +52,7 @@ python -m pip install --no-build-isolation --no-deps -e .
 
 En Windows puede usarse `py -3.12 -m venv .venv` y activar con `.venv\Scripts\Activate.ps1` en PowerShell. La instalación Windows no se ha validado. No hace falta uv para ejecutar el proyecto.
 
-`requirements.txt` fija dependencias directas y transitivas del bloque de ingesta y pruebas. `requirements.in` declara los requisitos de entrada. Los paquetes de modelado, visualización y notebooks se incorporarán cuando se implementen esos bloques. Para actualizar el archivo de versiones, desde un entorno con uv 0.13.1:
+`requirements.txt` fija dependencias directas y transitivas del bloque de ingesta y pruebas. `requirements.in` declara los requisitos de entrada. Incluye las dependencias de P1, visualización y tracking; los paquetes específicos de notebooks y de los demás modelos se incorporarán por sus responsables. Para actualizar el archivo de versiones, desde un entorno con uv 0.13.1:
 
 ```bash
 uv pip compile --universal --python-version 3.12 --no-emit-index-url requirements.in --output-file requirements.txt
@@ -106,11 +107,11 @@ Seguimos GitHub Flow: crear una rama desde `main`, trabajar en ella, abrir un Pu
 
 ## Buenas prácticas previstas de MLflow
 
-Experimento `mibici-equipo13`; al menos un run descriptivo por P1/P2/P3 ejecutado desde código. Registrar rango de fechas, versión de datos, semilla, modelo e hiperparámetros, métricas con conjunto evaluado, artefactos y etiquetas de equipo/pregunta/commit. No registrar datos personales ni credenciales. La integración aún está pendiente.
+Experimento `mibici-equipo13`; al menos un run descriptivo por P1/P2/P3 ejecutado desde código. Registrar rango de fechas, versión de datos, semilla, modelo e hiperparámetros, métricas con conjunto evaluado, artefactos y etiquetas de equipo/pregunta/commit. No registrar datos personales ni credenciales. P1 ya utiliza este contrato; falta integrar P2/P3 en un comando común.
 
 ## Equipo y acceso
 
-- Daniel Salinas Romero: creación del repositorio, estructura inicial e implementación del bloque de ingesta.
+- Daniel Salinas Romero: datos, reproducibilidad, arquitectura y P1.
 - José Alberto Velázquez Trujillo: integrante identificado en el documento colaborativo; rol por confirmar.
 - Integrantes restantes y roles: pendientes de confirmación.
 
@@ -119,3 +120,26 @@ El repositorio es público: compañeros y profesor pueden verlo y clonarlo sin i
 ## Procedencia
 
 Plantilla oficial: [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org/). Opciones de generación en `references/scaffold-config.json`.
+
+## Ejecutar P1 con el periodo definitivo
+
+Tras instalar el entorno y situarse en un commit del código:
+
+```bash
+python -m mibici.dataset reproduce --manifest references/data-manifest-2024-10_2026-09.json
+python -m mibici.geography
+python -m mibici.modeling.p1
+python -m mibici.plots
+```
+
+El primer comando descarga/reconstruye los 24 meses con sus hashes. El segundo verifica y descarga el polígono INEGI. El tercero registra tres runs P1 en `mibici-equipo13`, usando SQLite local y artefactos en `mlartifacts/`. Exige que código y dependencias estén en un commit para registrar su versión exacta; no depende de un notebook. `run_p1()` puede ser invocado desde el futuro orquestador común.
+
+Métricas y runIDs: `reports/p1/results.json` y `comparison.csv`. Figuras: `reports/figures/p1/`. La cohorte y los cortes de validación/prueba se mantienen comparables con la ejecución anual. La prueba abarca [2026-08-03, 2026-09-28), con origen móvil semanal; el resultado no acredita estaciones nuevas ni demanda no atendida. Las proyecciones anuales no se evalúan.
+
+Para consultar MLflow desde la raíz del repositorio:
+
+```bash
+mlflow server --backend-store-uri sqlite:///mlflow_tracking.db --host 127.0.0.1 --port 5013
+```
+
+Abrir http://127.0.0.1:5013 y seleccionar el experimento. Se puede usar `--tracking-uri` o `MLFLOW_TRACKING_URI` al ejecutar P1 para apuntar al servidor compartido que el equipo defina. SQLite y las carpetas de artefactos están excluidos de Git. Una nueva ejecución crea nuevos runIDs y conserva el protocolo; no debe sobrescribir manualmente los runs anteriores.

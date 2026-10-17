@@ -13,22 +13,23 @@ def architecture_figure():
     import matplotlib.pyplot as plt
     from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 
-    fig, ax = plt.subplots(figsize=(15, 6))
-    ax.set(xlim=(0, 15), ylim=(0, 6))
+    fig, ax = plt.subplots(figsize=(6.25, 8))
+    ax.set(xlim=(0, 6.25), ylim=(0, 8))
     ax.axis("off")
     nodes = {
-        "csv": (0.3, 4.2, "mibici\nCSV de viajes\ny estaciones"),
-        "ingest": (3.2, 4.2, "mibici.dataset\nLimpieza, tipos\ny SHA-256"),
-        "data": (6.1, 4.2, "data/processed\nParquet local\nFuera de Git"),
-        "features": (9.0, 4.2, "mibici.features\nSemanas completas\ny variables históricas"),
-        "others": (11.9, 4.2, "p2 / p3\nIntegración prevista\nOtros responsables"),
-        "inegi": (0.3, 1.8, "inegi\nPolígono de Zapopan\nGeoJSON 14120"),
-        "geo": (3.2, 1.8, "mibici.geography\nCoordenadas dentro\ndel polígono"),
-        "manifest": (6.1, 1.8, "references\nFuentes, conteos\ny hashes en Git"),
-        "p1": (9.0, 1.8, "mibici.modeling.p1\nBaselines semanales\nEvaluación temporal"),
-        "tracking": (11.9, 1.8, "mlflow\nSQLite, parámetros\ny artefactos locales"),
+        "csv": (0.15, 7.05, "mibici\nCSV de viajes y estaciones"),
+        "ingest": (3.45, 7.05, "mibici.dataset\nLimpieza y SHA-256"),
+        "data": (3.45, 5.95, "data/processed\nParquet local"),
+        "features": (3.45, 4.85, "mibici.features\nSemanas y retardos"),
+        "others": (0.15, 2.65, "p2 / p3\nIntegración prevista"),
+        "inegi": (0.15, 4.85, "inegi\nGeoJSON de Zapopan"),
+        "geo": (0.15, 3.75, "mibici.geography\nPunto en polígono"),
+        "manifest": (0.15, 5.95, "references\nManifiestos en Git"),
+        "p1": (3.45, 3.75, "mibici.modeling.p1\nBaselines y evaluación"),
+        "tracking": (3.45, 2.65, "mlflow\nSQLite y artefactos"),
+        "reports": (3.45, 1.55, "reports\nMétricas y figuras"),
     }
-    width, height = 2.5, 1.05
+    width, height = 2.6, 0.75
     for name, (x, y, text) in nodes.items():
         pending = name == "others"
         box = FancyBboxPatch((x, y), width, height, boxstyle="round,pad=0.08",
@@ -40,18 +41,16 @@ def architecture_figure():
     def arrow(start, end, dashed=False):
         ax.add_patch(FancyArrowPatch(start, end, arrowstyle="-|>", mutation_scale=13,
                                      color="#455a64", linestyle="--" if dashed else "-"))
-    for source, target in [("csv", "ingest"), ("ingest", "data"), ("data", "features"),
-                           ("features", "others"), ("inegi", "geo"), ("p1", "tracking")]:
-        x, y, _ = nodes[source]; u, v, _ = nodes[target]
-        arrow((x + width + .08, y + height/2), (u-.08, v+height/2), target == "others")
-    arrow((10.25, 4.1), (10.25, 2.95))
-    arrow((4.45, 4.1), (7.35, 2.95))
-    arrow((5.78, 2.5), (8.92, 4.42))
-    ax.text(7.6, 0.85, "Salidas de P1: reports/p1 (métricas) y reports/figures/p1 (gráficas)",
-            ha="center", fontsize=10)
-    arrow((10.25, 1.7), (10.25, 1.15))
-    ax.set_title("Equipo 13 · Base reproducible y arquitectura de P1", fontsize=16, pad=12)
-    ax.text(0.3, 0.25, "Datos, modelos y tracking permanecen locales. Git conserva código, documentación, metadatos y evidencias.", fontsize=9)
+    arrow((2.85, 7.425), (3.35, 7.425))
+    for y in (7.05, 5.95, 4.85, 3.75, 2.65):
+        arrow((4.75, y - .05), (4.75, y - .30))
+    arrow((3.35, 7.15), (2.85, 6.55))
+    arrow((1.45, 4.80), (1.45, 4.55))
+    arrow((2.85, 4.15), (3.35, 5.15))
+    ax.plot([3.35, 3.05, 3.05], [4.95, 4.75, 3.025], color="#455a64", linestyle="--", linewidth=1)
+    arrow((3.05, 3.025), (2.85, 3.025), True)
+    ax.set_title("Equipo 13 · Arquitectura de P1", fontsize=12, pad=8)
+    ax.text(.15, .72, "Datos, modelos y tracking: locales.\nGit: código, documentos, metadatos y evidencias.", fontsize=8.5)
     fig.tight_layout()
     config.FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     for extension in ("png", "svg"):

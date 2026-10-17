@@ -16,3 +16,10 @@ verify:
 
 test:
 	$(PYTHON_INTERPRETER) -m pytest -q
+
+.PHONY: p1 architecture
+p1:
+	$(PYTHON_INTERPRETER) -m mibici.modeling.p1
+
+architecture:
+	$(PYTHON_INTERPRETER) -m mibici.plots
