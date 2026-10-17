@@ -42,8 +42,10 @@ def architecture_figure():
         ax.add_patch(FancyArrowPatch(start, end, arrowstyle="-|>", mutation_scale=13,
                                      color="#455a64", linestyle="--" if dashed else "-"))
     arrow((2.85, 7.425), (3.35, 7.425))
-    for y in (7.05, 5.95, 4.85, 3.75, 2.65):
+    for y in (7.05, 5.95, 4.85, 3.75):
         arrow((4.75, y - .05), (4.75, y - .30))
+    ax.plot([3.4, 3.2, 3.2], [4.125, 4.125, 1.925], color="#455a64", linewidth=1)
+    arrow((3.2, 1.925), (3.4, 1.925))
     arrow((3.35, 7.15), (2.85, 6.55))
     arrow((1.45, 4.80), (1.45, 4.55))
     arrow((2.85, 4.15), (3.35, 5.15))

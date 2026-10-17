@@ -41,7 +41,7 @@ reports/figures/         # Figuras
 
 ## Instalación
 
-Python **3.12** (validado con 3.12.15). Instalación, 24 pruebas y reconstrucción de hashes verificadas desde un clon limpio en macOS ARM64; detalle en [references/VALIDACION_INGESTA.md](references/VALIDACION_INGESTA.md). Desde un clon del repositorio y la rama de este cambio:
+Python **3.12** (validado con 3.12.15). Instalación, 37 pruebas y reproducción de P1 verificadas en un clon y entorno nuevos en macOS ARM64; detalle y alcance de la validación en [references/VALIDACION_P1.md](references/VALIDACION_P1.md). Desde un clon del repositorio y la rama de este cambio:
 
 ```bash
 python3.12 -m venv .venv
