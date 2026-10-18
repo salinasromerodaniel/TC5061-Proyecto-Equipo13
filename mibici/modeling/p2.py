@@ -178,7 +178,12 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
             mlflow.log_artifact(str(config.PROJ_ROOT / "mibici" / "modeling" / "p2.py"), "source")
             mlflow.log_artifact(str(config.PROJ_ROOT / "mibici" / "p2_panel.py"), "source")
             mlflow.log_artifact(str(config.PROJ_ROOT / "requirements.txt"), "source")
-            mlflow.sklearn.log_model(model, name="model", input_example=train[features].head(2))
+            # Autorizar solo el árbol del modelo recién entrenado localmente.
+            mlflow.sklearn.log_model(
+                model, name="model", input_example=train[features].head(2),
+                skops_trusted_types=(
+                    ["sklearn.tree._tree.Tree"] if name == "random_forest" else []),
+            )
             comparisons.append({"model": name, "run_id": run.info.run_id, **metrics})
     # Elegir con validación exclusivamente; prueba solo informa desempeño final.
     selected = max(comparisons, key=lambda row: row["validation_f1"])["model"]
