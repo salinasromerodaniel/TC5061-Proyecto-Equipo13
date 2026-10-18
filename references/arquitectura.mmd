@@ -8,6 +8,12 @@ flowchart LR
   features --> p1["mibici.modeling.p1: baselines y evaluación temporal"]
   p1 --> tracking["mlflow: SQLite y artefactos locales"]
   p1 --> reports["reports: métricas y figuras"]
-  features -. "integración prevista" .-> others["p2 y p3: pendientes de sus responsables"]
+  data --> p2panel["mibici.modeling.p2 + p2_panel: flujos semanales, cohorte y horizonte t+1"]
+  manifest --> p2panel
+  geo --> p2panel
+  p2panel --> p2["P2: Dummy y Random Forest; train, validación y prueba temporal"]
+  p2 --> tracking
+  p2 --> reports
+  features -. "integración prevista" .-> others["p3: pendiente de su responsable"]
   classDef pending stroke-dasharray:5 5,fill:#f4f4f4;
   class others pending;
