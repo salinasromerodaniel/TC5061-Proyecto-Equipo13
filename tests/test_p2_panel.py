@@ -64,6 +64,28 @@ class P2PanelTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_panel(self.counts, self.stations, self.weeks.delete(5), 4, 4)
 
+    def test_geographic_filter_excludes_other_stations_but_reports_unknown_ids(self):
+        other = self.counts.copy()
+        other["station_id"] = 3
+        unknown = self.counts.copy()
+        unknown["station_id"] = 405
+        panel, _, metadata = build_panel(
+            pd.concat([self.counts, other, unknown]), self.stations, self.weeks, 4, 4,
+            station_ids=[1, 2])
+        self.assertEqual(set(panel.station_id), {1})
+        self.assertEqual(metadata["geographic_catalog_stations"], 2)
+        self.assertEqual(metadata["geographic_nonpositive_or_missing_capacity"], 1)
+        self.assertEqual(metadata["unknown_station_ids"], [405])
+        self.assertNotIn(3, metadata["stations_without_sufficient_training_history"])
+
+    def test_geographic_selection_preserves_both_event_counts(self):
+        panel, _, _ = build_panel(self.counts, self.stations, self.weeks, 4, 4,
+                                   station_ids=[1])
+        source = self.counts.set_index("week_start")
+        for row in panel.itertuples():
+            self.assertEqual(row.departures, source.loc[row.week_start, "departures"])
+            self.assertEqual(row.arrivals, source.loc[row.week_start, "arrivals"])
+
 
 if __name__ == "__main__":
     unittest.main()

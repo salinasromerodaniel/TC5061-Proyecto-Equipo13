@@ -15,6 +15,7 @@ import pyarrow.parquet as pq
 from mibici import config
 from mibici.dataset import read_manifest, verify_manifest
 from mibici.features import full_weeks
+from mibici.geography import load_boundary, municipality_station_ids
 from mibici.modeling.p1 import code_commit
 from mibici.p2_panel import build_panel
 
@@ -81,7 +82,8 @@ def confusion_figure(actual, predictions, path, title):
 
 
 def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
-           tracking_uri=None, report_dir=config.P2_REPORT_DIR):
+           tracking_uri=None, report_dir=config.P2_REPORT_DIR,
+           boundary_manifest=config.P1_BOUNDARY_MANIFEST):
     """Verificar datos, ajustar solo con train y registrar dos runs reproducibles."""
     import mlflow
     import mlflow.sklearn
@@ -95,15 +97,31 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
     verify_manifest(manifest, data_dir)
     counts = weekly_counts(manifest, data_dir)
     stations = pd.read_parquet(Path(data_dir) / "processed" / "stations.parquet")
+    geometry, geography = load_boundary(data_dir, boundary_manifest)
+    zapopan_ids = municipality_station_ids(stations, geometry)
+    if not zapopan_ids:
+        raise ValueError("El polígono de Zapopan no contiene estaciones del catálogo.")
+    # Filtrar estaciones después de contar ambos extremos de todos los viajes:
+    # un viaje que cruza el municipio sí aporta al extremo situado en Zapopan.
     panel, features, metadata = build_panel(
         counts, stations, full_weeks(manifest["months"]),
-        config.P2_VALIDATION_WEEKS, config.P2_TEST_WEEKS)
+        config.P2_VALIDATION_WEEKS, config.P2_TEST_WEEKS, station_ids=zapopan_ids)
+    metadata.update({"scope": "inegi_zapopan_reference_polygon_historical_cohort",
+                     "municipality_code": geography["municipality_code"],
+                     "municipality_name": geography["municipality_name"],
+                     "boundary_sha256": geography["sha256"],
+                     "geographic_station_ids": zapopan_ids,
+                     "cohort_station_ids": sorted(int(i) for i in panel.station_id.unique())})
     metadata["time_policy"] = manifest["time_policy"]
     # Auditar eventos excluidos por catálogo/capacidad; no inventar capacidad.
     valid_ids = set(stations.loc[stations.capacity > 0, "station_id"])
     excluded = counts[~counts.station_id.isin(valid_ids)]
     metadata["events_excluded_by_catalog_or_capacity"] = {
         name: int(excluded[name].sum()) for name in ("departures", "arrivals")}
+    outside = counts[counts.station_id.isin(stations.station_id) &
+                     ~counts.station_id.isin(zapopan_ids)]
+    metadata["events_outside_zapopan_reference"] = {
+        name: int(outside[name].sum()) for name in ("departures", "arrivals")}
     report_dir = Path(report_dir)
     report_dir.mkdir(parents=True, exist_ok=True)
     (report_dir / "split_metadata.json").write_text(
@@ -137,16 +155,21 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
             "target_definition": TARGET, "features": ",".join(features),
             "capacity_policy": metadata["capacity_policy"], "scope": metadata["scope"],
             "cohort_stations": metadata["cohort_stations"],
+            "municipality_code": geography["municipality_code"],
+            "municipality_name": geography["municipality_name"],
+            "boundary_sha256": geography["sha256"],
+            "geographic_catalog_stations": len(zapopan_ids),
             "python_version": platform.python_version(), "pandas_version": pd.__version__,
             "sklearn_version": sklearn.__version__, "mlflow_version": mlflow.__version__,
         }
         for split, details in metadata["partitions"].items():
             params.update({f"{split}_{key}": value for key, value in details.items()})
         with mlflow.start_run(
-                run_name=f"P2_{name}_{manifest['months'][0]}_{manifest['months'][-1]}",
+                run_name=f"P2_Zapopan_{name}_{manifest['months'][0]}_{manifest['months'][-1]}",
                 tags={"team": "13", "question": "P2", "git_commit": commit,
                       "mlflow.source.git.commit": commit, "target_kind": "indirect_proxy",
-                      "capacity_reference": "2026-09_retrospective"}) as run:
+                      "capacity_reference": "2026-09_retrospective",
+                      "municipality": "Zapopan"}) as run:
             model.fit(train[features], train.target)
             mlflow.log_params(params)
             metrics = {}
@@ -175,10 +198,12 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
             mlflow.log_artifacts(str(model_dir), artifact_path="evaluation")
             mlflow.log_dict(metadata, "evaluation/split_metadata.json")
             mlflow.log_dict(manifest, "data/data_manifest.json")
+            mlflow.log_dict(geography, "data/geography_manifest.json")
             mlflow.log_artifact(str(config.PROJ_ROOT / "mibici" / "modeling" / "p2.py"), "source")
             mlflow.log_artifact(str(config.PROJ_ROOT / "mibici" / "p2_panel.py"), "source")
             mlflow.log_artifact(str(config.PROJ_ROOT / "requirements.txt"), "source")
-            # Autorizar solo el árbol del modelo recién entrenado localmente.
+            # Solo se autoriza el árbol del estimador recién entrenado aquí;
+            # no se cargan archivos externos ni listas automáticas de tipos.
             mlflow.sklearn.log_model(
                 model, name="model", input_example=train[features].head(2),
                 skops_trusted_types=(
@@ -206,8 +231,10 @@ def main():
     parser.add_argument("--data-dir", type=Path, default=config.DATA_DIR)
     parser.add_argument("--tracking-uri")
     parser.add_argument("--report-dir", type=Path, default=config.P2_REPORT_DIR)
+    parser.add_argument("--boundary-manifest", type=Path, default=config.P1_BOUNDARY_MANIFEST)
     args = parser.parse_args()
-    run_p2(args.manifest, args.data_dir, args.tracking_uri, args.report_dir)
+    run_p2(args.manifest, args.data_dir, args.tracking_uri, args.report_dir,
+           args.boundary_manifest)
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ flowchart LR
   p1 --> reports["reports: métricas y figuras"]
   data --> p2panel["mibici.modeling.p2 + p2_panel: flujos semanales, cohorte y horizonte t+1"]
   manifest --> p2panel
+  geo --> p2panel
   p2panel --> p2["P2: Dummy y Random Forest; train, validación y prueba temporal"]
   p2 --> tracking
   p2 --> reports

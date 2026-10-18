@@ -7,7 +7,7 @@ FEATURES = ["capacity", "departures", "arrivals", "net_flow",
             "departures_mean4", "arrivals_mean4", "net_flow_mean4"]
 
 
-def build_panel(counts, stations, weeks, validation_weeks=8, test_weeks=8):
+def build_panel(counts, stations, weeks, validation_weeks=8, test_weeks=8, station_ids=None):
     """Fijar cohorte con historia de entrenamiento y predecir t+1 desde cierre de t.
 
     Los ceros posteriores a la primera actividad son ausencia de viajes registrados,
@@ -26,6 +26,8 @@ def build_panel(counts, stations, weeks, validation_weeks=8, test_weeks=8):
         raise ValueError("El catálogo debe tener station_id único.")
     eligible = stations.loc[stations.capacity.notna() & (stations.capacity > 0),
                             ["station_id", "capacity"]].copy()
+    geographic_ids = (set(stations.station_id) if station_ids is None else set(station_ids))
+    eligible = eligible[eligible.station_id.isin(geographic_ids)]
     validation_start = weeks[-(validation_weeks + test_weeks)]
     test_start = weeks[-test_weeks]
     selected = counts[counts.week_start.isin(weeks) &
@@ -61,14 +63,20 @@ def build_panel(counts, stations, weeks, validation_weeks=8, test_weeks=8):
     panel.loc[panel.target_week >= test_start, "split"] = "test"
     panel = panel.sort_values(["target_week", "station_id"]).reset_index(drop=True)
     metadata = {
-        "scope": "all_network_catalog_positive_capacity_historical_cohort",
+        "scope": ("all_network_catalog_positive_capacity_historical_cohort" if station_ids is None
+                  else "reference_polygon_positive_capacity_historical_cohort"),
         "capacity_policy": "fixed_september_2026_reference_not_historical_inventory",
         "history_weeks": 4, "horizon_days": 7,
         "forecast_origin": "target_monday_00_source_naive_time",
         "evaluation_protocol": "fixed_train_fit_weekly_observed_features_no_test_tuning",
         "cohort_stations": len(first_seen),
         "catalog_stations": len(stations),
-        "catalog_nonpositive_or_missing_capacity": int(len(stations) - len(eligible)),
+        "geographic_catalog_stations": int(stations.station_id.isin(geographic_ids).sum()),
+        "catalog_nonpositive_or_missing_capacity": int(
+            (stations.capacity.isna() | (stations.capacity <= 0)).sum()),
+        "geographic_nonpositive_or_missing_capacity": int(
+            (stations.station_id.isin(geographic_ids) &
+             (stations.capacity.isna() | (stations.capacity <= 0))).sum()),
         "unknown_station_ids": sorted(int(i) for i in set(counts.station_id) - set(stations.station_id)),
         "stations_without_sufficient_training_history": sorted(
             int(i) for i in set(eligible.station_id) - set(first_seen.index)),
