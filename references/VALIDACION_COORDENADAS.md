@@ -22,4 +22,16 @@ Datos de 24 meses v2: `6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842
 - Comparación espacial con el catálogo anterior: las mismas 106 estaciones de referencia cubiertas por el polígono de Zapopan.
 - Los hashes de viajes y manifiestos históricos permanecen iguales. El catálogo reparado requiere verificar con el manifiesto v2.
 
-La ejecución de P1 y la matriz de GitHub Actions se comprobarán antes de cerrar el PR. La presencia de un workflow no constituye por sí sola evidencia de que haya pasado.
+## Ejecución P1 con transformación 2
+
+Commit ejecutado: `e0de9cf5f3a9d27bbee1e2abacbb0c71454b5d89`. Resultados en `reports/p1/v2/results.json` y `comparison.csv`. Se comprobaron por aserciones todas las métricas de los tres baselines, las particiones, la cohorte de 78 estaciones y el baseline seleccionado: son idénticos a los resultados históricos de transformación 1. Los runIDs nuevos son:
+
+- Semana anterior: `e9b2e1865b434a159da0f0a3ac872950`.
+- Media de cuatro semanas: `3ef5fd7ae3b44643b543f064891a553f`.
+- Estacional de 52 semanas: `f40585c1fdb841eb890fce8d3a02a092`.
+
+## Validación en tres sistemas
+
+[GitHub Actions, ejecución 39159472290](https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/39159472290) terminó correctamente en Windows, Linux y macOS. En cada sistema se instalaron las dependencias fijadas, se comprobó `pip check` y se ejecutaron las pruebas con deprecaciones como errores, incluida la reconstrucción del catálogo oficial y coincidencia del SHA-256 v2 publicado.
+
+Esta prueba acredita el catálogo real y la lógica de ingesta con fixtures en los tres sistemas; no significa que se hayan reconstruido los 24 meses reales en cada runner. Los viajes reales se conservaron y verificaron localmente. En las computadoras de los compañeros, `repair-stations` comprobará también sus archivos de viajes antes de aceptar la reparación.

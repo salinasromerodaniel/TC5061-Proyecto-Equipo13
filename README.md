@@ -52,7 +52,7 @@ python -m mibici.dataset verify --manifest references/data-manifest-2024-10_2026
 
 `repair-stations` no usa red ni vuelve a generar viajes. Verifica todos los originales y Parquet de viajes contra los hashes publicados, reconstruye el catálogo desde su CSV original y exige el hash v2 antes de reemplazar el archivo anterior. Ante cualquier otra discrepancia se detiene. Si usaste una ubicación personalizada, incluye `--data-dir` en ambos comandos. Si faltan meses, usa `reproduce` con el manifiesto v2; reutiliza los CSV cuyo hash coincide.
 
-La validación de portabilidad ejecuta pruebas y reconstruye el catálogo oficial de 484 estaciones en Windows, Linux y macOS mediante GitHub Actions. El resultado de cada ejecución debe consultarse en el PR; la configuración del workflow por sí sola no acredita que haya pasado.
+La validación de portabilidad pasó en Windows, Linux y macOS: pruebas, dependencias y reconstrucción del catálogo oficial de 484 estaciones con su hash exacto. Alcance, ejecución de CI y resultados de P1 en [references/VALIDACION_COORDENADAS.md](references/VALIDACION_COORDENADAS.md).
 
 ## Instalación
 

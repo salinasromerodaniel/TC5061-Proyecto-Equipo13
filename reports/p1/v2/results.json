@@ -1,0 +1,128 @@
+{
+  "question": "P1",
+  "experiment": "mibici-equipo13",
+  "git_commit": "e0de9cf5f3a9d27bbee1e2abacbb0c71454b5d89",
+  "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+  "data_summary": {
+    "catalog_stations": 484,
+    "duplicate_rows_removed": 758,
+    "months": 24,
+    "raw_trips": 9043925,
+    "station_ids_missing_from_catalog": [
+      405,
+      407
+    ],
+    "trip_stations": 472,
+    "trips": 9043167
+  },
+  "geography_sha256": "b7b9207074bc0dbe807a43eceb6f02dafb6a8c1ede27484c05fec073e0d6fabe",
+  "split": {
+    "full_weeks": 103,
+    "first_full_week": "2024-10-07",
+    "last_full_week": "2026-09-21",
+    "validation_start": "2026-06-08",
+    "test_start": "2026-08-03",
+    "test_end_exclusive": "2026-09-28",
+    "history_weeks": 4,
+    "cohort_stations": 78,
+    "geographic_catalog_stations": 106,
+    "new_station_ids_excluded": [
+      104,
+      427,
+      430,
+      431,
+      432,
+      433,
+      434,
+      435,
+      444,
+      488,
+      489,
+      504,
+      505,
+      508,
+      509,
+      510,
+      511,
+      513,
+      514,
+      516,
+      517,
+      518,
+      519
+    ],
+    "rows_by_split": {
+      "test": 624,
+      "train": 5927,
+      "validation": 609
+    },
+    "stations_by_split": {
+      "test": 78,
+      "train": 73,
+      "validation": 78
+    },
+    "weeks_by_split": {
+      "test": 8,
+      "train": 83,
+      "validation": 8
+    },
+    "target": "observed_started_trips",
+    "horizon_days": 7,
+    "evaluation_protocol": "weekly_rolling_origin_prior_observations_available",
+    "cohort_policy": "observed_departures_in_recent_training_only",
+    "cohort_observation_start": "2025-10-06",
+    "origin_ids_missing_from_catalog": [
+      405,
+      407
+    ],
+    "starts_missing_origin_coordinates": 1960,
+    "scope": "origin_coordinates_covered_by_inegi_zapopan_reference_polygon",
+    "source_time_policy": "source_naive_no_timezone_conversion"
+  },
+  "selection_metric": "validation_mae",
+  "selected_baseline": "previous_week",
+  "models": [
+    {
+      "model": "previous_week",
+      "run_id": "e9b2e1865b434a159da0f0a3ac872950",
+      "train_mae": 16.217816770710307,
+      "train_rmse": 28.292826935724314,
+      "train_wape": 0.1498071363448636,
+      "validation_mae": 15.978653530377668,
+      "validation_rmse": 27.592299204115957,
+      "validation_wape": 0.17568153096226755,
+      "test_mae": 17.373397435897434,
+      "test_rmse": 27.94898626664898,
+      "test_wape": 0.15469684213530444
+    },
+    {
+      "model": "mean_previous_weeks",
+      "run_id": "3ef5fd7ae3b44643b543f064891a553f",
+      "train_mae": 16.937109836342163,
+      "train_rmse": 31.299506592878608,
+      "train_wape": 0.15645138667019926,
+      "validation_mae": 16.273399014778324,
+      "validation_rmse": 27.713472090371077,
+      "validation_wape": 0.17892218812059937,
+      "test_mae": 21.86017628205128,
+      "test_rmse": 38.35804013226512,
+      "test_wape": 0.19464818276516502
+    },
+    {
+      "model": "seasonal_52_weeks",
+      "run_id": "f40585c1fdb841eb890fce8d3a02a092",
+      "train_mae": 19.479331871098363,
+      "train_rmse": 32.80726318410573,
+      "train_wape": 0.17993438739489906,
+      "validation_mae": 24.839080459770116,
+      "validation_rmse": 39.01932071631388,
+      "validation_wape": 0.2730998375157971,
+      "test_mae": 31.102564102564102,
+      "test_rmse": 55.029683132297116,
+      "test_wape": 0.2769445911043251,
+      "train_seasonal_fallback_fraction": 0.5841066306731905,
+      "validation_seasonal_fallback_fraction": 0.06732348111658457,
+      "test_seasonal_fallback_fraction": 0.08974358974358974
+    }
+  ]
+}
