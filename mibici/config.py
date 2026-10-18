@@ -16,18 +16,18 @@ SOURCE_PAGE = "https://www.mibici.net/es/datos-abiertos/"
 DEFAULT_START_MONTH = "2026-09"
 DEFAULT_END_MONTH = "2026-09"
 STATIONS_FILENAME = "nomenclatura_2026_09.csv"
-DEFAULT_MANIFEST = PROJ_ROOT / "references" / "data-manifest-2026-09.json"
+DEFAULT_MANIFEST = PROJ_ROOT / "references" / "data-manifest-2026-09-v2.json"
 RANDOM_SEED = 13
 CHUNK_SIZE = 100_000
 TIMEOUT_SECONDS = 60
 HTTP_RETRIES = 3
-TRANSFORM_VERSION = "1"
+TRANSFORM_VERSION = "2"
 MANIFEST_VERSION = 1
 
 # P1: experimento retrospectivo de una semana para Zapopan.
 P1_START_MONTH = "2024-10"
 P1_END_MONTH = "2026-09"
-P1_DATA_MANIFEST = PROJ_ROOT / "references" / "data-manifest-2024-10_2026-09.json"
+P1_DATA_MANIFEST = PROJ_ROOT / "references" / "data-manifest-2024-10_2026-09-v2.json"
 P1_BOUNDARY_MANIFEST = PROJ_ROOT / "references" / "zapopan-boundary-manifest.json"
 P1_BOUNDARY_URL = "https://gaia.inegi.org.mx/wscatgeo/v2/geo/mgem/14120"
 P1_MUNICIPALITY_CODE = "14120"
