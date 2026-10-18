@@ -116,3 +116,83 @@ def p1_station_week_panel(counts, station_ids, months,
                 "cohort_policy": "observed_departures_in_recent_training_only",
                 "cohort_observation_start": cohort_start.date().isoformat()}
     return panel, metadata
+def p3_station_features(manifest, data_dir):
+    """Construir variables agregadas por estación para clustering."""
+
+    import pandas as pd
+    import pyarrow.parquet as pq
+
+    departures = []
+    arrivals = []
+
+    for entry in manifest["files"]:
+        if entry["kind"] != "trips":
+            continue
+
+        parquet = pq.ParquetFile(
+            manifest_path(data_dir, entry["path"])
+        )
+
+        for batch in parquet.iter_batches(
+            columns=[
+                "origin_station_id",
+                "destination_station_id",
+            ]
+        ):
+            frame = batch.to_pandas()
+
+            departures.append(
+                frame.groupby("origin_station_id")
+                .size()
+                .rename("departures")
+            )
+
+            arrivals.append(
+                frame.groupby("destination_station_id")
+                .size()
+                .rename("arrivals")
+            )
+
+    departures = (
+        pd.concat(departures)
+        .groupby(level=0)
+        .sum()
+    )
+
+    arrivals = (
+        pd.concat(arrivals)
+        .groupby(level=0)
+        .sum()
+    )
+
+    stations = pd.read_parquet(
+        data_dir / "processed/stations.parquet"
+    )
+
+    features = stations.merge(
+        departures.rename("departures"),
+        left_on="station_id",
+        right_index=True,
+        how="left",
+    )
+
+    features = features.merge(
+        arrivals.rename("arrivals"),
+        left_on="station_id",
+        right_index=True,
+        how="left",
+    )
+
+    features = features.fillna(0)
+
+    features["traffic"] = (
+        features["departures"]
+        + features["arrivals"]
+    )
+
+    features["balance"] = (
+        features["departures"]
+        - features["arrivals"]
+    )
+
+    return features
