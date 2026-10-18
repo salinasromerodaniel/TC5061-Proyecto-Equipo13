@@ -217,3 +217,74 @@ def test_download_hash_mismatch_preserves_previous_file(tmp_path):
 def test_historical_day_first_minute_precision():
     result = ds.datetime_column(pd.Series(["01/10/2024 0:00", "31/10/2024 23:59"]), "date")
     assert result.tolist() == [pd.Timestamp("2024-10-01 00:00"), pd.Timestamp("2024-10-31 23:59")]
+
+
+@pytest.mark.parametrize("column,value,expected_hex", [
+    ("latitude", "20.691846603895982", "0x1.4b11cdbe994f8p+4"),
+    ("latitude", "20.677224371110494", "0x1.4ad5e938df947p+4"),
+    ("longitude", "-103.36805841104507", "-0x1.9d78e44dd9d34p+6"),
+    ("longitude", "-103.35553513424429", "-0x1.9d6c1166f8a20p+6"),
+])
+def test_coordinate_decimal_conversion_exact_bits(column, value, expected_hex):
+    frame = stations()
+    frame.loc[0, column] = value
+    assert ds.normalize_stations(frame).loc[0, column].hex() == expected_hex
+
+
+@pytest.mark.parametrize("value", ["", "garbage", "NaN", "inf", "-inf", "1e999", None, pd.NA])
+def test_coordinate_conversion_rejects_invalid_and_nonfinite(value):
+    frame = stations()
+    frame.loc[0, "latitude"] = value
+    with pytest.raises(ds.DataError, match="latitude"):
+        ds.normalize_stations(frame)
+
+
+def test_repair_stations_preserves_trips_and_requires_other_hashes(tmp_path, monkeypatch):
+    _, sources = fixtures(tmp_path, monkeypatch)
+    data = tmp_path / "data"
+    manifest = ds.build_manifest(None, sources, data, ["2026-09"], 1)
+    target = data / "processed/stations.parquet"
+    trip = data / "processed/trips_2026-09.parquet"
+    trip_hash = ds.sha256_file(trip)
+    target.write_bytes(b"previous platform output")
+    ds.repair_stations(manifest, data)
+    ds.verify_manifest(manifest, data)
+    assert ds.sha256_file(trip) == trip_hash
+    target.unlink()
+    ds.repair_stations(manifest, data)
+    ds.verify_manifest(manifest, data)
+    target.write_bytes(b"preserve on failure")
+    trip.write_bytes(b"corrupt trip")
+    with pytest.raises(ds.DataError, match="trips_"):
+        ds.repair_stations(manifest, data)
+    assert target.read_bytes() == b"preserve on failure"
+
+
+def test_repair_stations_preserves_previous_file_if_candidate_hash_differs(tmp_path, monkeypatch):
+    _, sources = fixtures(tmp_path, monkeypatch)
+    data = tmp_path / "data"
+    manifest = ds.build_manifest(None, sources, data, ["2026-09"], 1)
+    target = data / "processed/stations.parquet"
+    target.write_bytes(b"preserve previous")
+    entry = next(f for f in manifest["files"] if f["kind"] == "stations")
+    entry["sha256"] = "0" * 64
+    with pytest.raises(ds.DataError):
+        ds.repair_stations(manifest, data)
+    assert target.read_bytes() == b"preserve previous"
+
+
+def test_published_station_catalog_bytes(tmp_path):
+    """Integración pequeña: el mismo catálogo oficial debe producir los bytes publicados."""
+    import os
+    if os.environ.get("MIBICI_CATALOG_INTEGRATION") != "1":
+        pytest.skip("Activar MIBICI_CATALOG_INTEGRATION=1 para consultar el catálogo oficial")
+    manifest = ds.read_manifest(ds.config.P1_DATA_MANIFEST)
+    raw = next(f for f in manifest["files"] if f["kind"] == "raw_stations")
+    entry = next(f for f in manifest["files"] if f["kind"] == "stations")
+    source = ds.manifest_path(tmp_path, raw["path"])
+    with ds.http_session() as session:
+        ds.download(session, raw["url"], source, raw["sha256"])
+    frame = pd.read_csv(source, encoding=raw["encoding"], sep=raw["delimiter"], dtype="string")
+    ds.parquet_atomic([ds.normalize_stations(frame)], ds.STATION_SCHEMA,
+                      ds.manifest_path(tmp_path, entry["path"]))
+    ds.verify_manifest({"files": [raw, entry]}, tmp_path)

@@ -7,6 +7,7 @@ from datetime import datetime
 import hashlib
 from html.parser import HTMLParser
 import json
+import math
 from pathlib import Path
 import re
 import tempfile
@@ -178,7 +179,14 @@ def normalize_stations(frame):
     if clean.station_id.duplicated().any():
         raise DataError("El catálogo tiene identificadores de estación duplicados.")
     for name, low, high in (("latitude", -90, 90), ("longitude", -180, 180)):
-        clean[name] = pd.to_numeric(clean[name], errors="coerce")
+        try:
+            # Parsear cada decimal del CSV con la misma conversión binaria de Python.
+            values = [float(value) for value in clean[name]]
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise DataError(f"{name}: coordenadas inválidas.") from exc
+        if not all(math.isfinite(value) for value in values):
+            raise DataError(f"{name}: coordenadas inválidas.")
+        clean[name] = pd.Series(values, index=clean.index, dtype="float64")
         if not clean[name].between(low, high).all():
             raise DataError(f"{name}: coordenadas inválidas.")
     clean["station_name"] = clean.station_name.astype("string").str.normalize("NFC").str.strip()
@@ -403,6 +411,38 @@ def verify_manifest(manifest, data_dir):
             raise DataError(f"Número de registros distinto: {entry['path']}.")
 
 
+def require_reproduction_versions(manifest):
+    if manifest["transform_version"] != config.TRANSFORM_VERSION:
+        raise DataError("Se requiere la versión original del código de transformación; "
+                        "para la conversión portable usa el manifiesto -v2.json.")
+    if manifest["versions"] != environment_versions():
+        raise DataError("Instala las versiones de pandas/pyarrow del manifiesto.")
+
+
+def repair_stations(manifest, data_dir):
+    """Reconstruir solo el catálogo; exigir hashes exactos de fuentes y demás archivos."""
+    require_reproduction_versions(manifest)
+    entries = [entry for entry in manifest["files"] if entry["kind"] == "stations"]
+    raw_entries = [entry for entry in manifest["files"] if entry["kind"] == "raw_stations"]
+    if len(entries) != 1 or len(raw_entries) != 1:
+        raise DataError("Se requiere un catálogo original y uno procesado en el manifiesto.")
+    entry, raw = entries[0], raw_entries[0]
+    # El archivo que se repara puede faltar o venir de la transformación anterior.
+    # Ninguna otra discrepancia se acepta, incluidos los CSV y Parquet de viajes.
+    verify_manifest({"files": [f for f in manifest["files"] if f is not entry]}, data_dir)
+    frame = pd.read_csv(manifest_path(data_dir, raw["path"]), encoding=raw["encoding"],
+                        sep=raw["delimiter"], dtype="string")
+    clean = normalize_stations(frame)
+    destination = manifest_path(data_dir, entry["path"])
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=destination.parent) as temporary:
+        candidate_root = Path(temporary)
+        candidate = manifest_path(candidate_root, entry["path"])
+        parquet_atomic([clean], STATION_SCHEMA, candidate)
+        verify_manifest({"files": [entry]}, candidate_root)
+        candidate.replace(destination)
+
+
 def save_manifest(manifest, destination):
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=destination.parent,
@@ -418,7 +458,7 @@ def save_manifest(manifest, destination):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("ingest", "verify", "reproduce"))
+    parser.add_argument("command", choices=("ingest", "verify", "reproduce", "repair-stations"))
     parser.add_argument("--start-month", default=config.DEFAULT_START_MONTH)
     parser.add_argument("--end-month", default=config.DEFAULT_END_MONTH)
     parser.add_argument("--stations-file", default=config.STATIONS_FILENAME)
@@ -432,12 +472,12 @@ def main(argv=None):
         if args.command == "verify":
             manifest = read_manifest(args.manifest)
             verify_manifest(manifest, args.data_dir)
+        elif args.command == "repair-stations":
+            manifest = read_manifest(args.manifest)
+            repair_stations(manifest, args.data_dir)
         elif args.command == "reproduce":
             expected = read_manifest(args.manifest)
-            if expected["transform_version"] != config.TRANSFORM_VERSION:
-                raise DataError("Se requiere la versión original del código de transformación.")
-            if expected["versions"] != environment_versions():
-                raise DataError("Instala las versiones de pandas/pyarrow del manifiesto.")
+            require_reproduction_versions(expected)
             sources = {f.get("month", "stations"): f["url"] for f in expected["files"]
                        if f["kind"].startswith("raw_")}
             with http_session() as session:

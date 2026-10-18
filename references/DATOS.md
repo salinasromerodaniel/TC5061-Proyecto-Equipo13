@@ -46,3 +46,13 @@ En la página consultada se ofrecen descargas abiertas; no se identificó allí 
 El manifiesto versionado contiene fuentes exactas, filas originales y limpias, duplicados, esquemas, rango observado, versiones de pandas/pyarrow y SHA-256 de CSV y Parquet. `data_version` es el SHA-256 de la representación JSON canónica de todo el manifiesto, excluyendo ese mismo campo. No incluye hora de ejecución ni rutas absolutas.
 
 `verify` comprueba hashes y conteos locales sin red. `reproduce` verifica la versión de transformación y dependencias de serialización, recupera las fuentes exactas y exige reconstruir el mismo manifiesto. Una actualización del portal puede impedir reconstruir una versión si elimina o reemplaza el original; los hashes detectan el cambio, pero no sustituyen un archivo histórico externo. No se ha configurado ese almacenamiento adicional.
+
+## Transformación 2 — coordenadas consistentes entre entornos
+
+El 18 de octubre de 2026 se detectaron diferencias en los últimos bits de `latitude` entre macOS y los catálogos reconstruidos por dos compañeros. Filas, IDs, nombres, longitudes y capacidades coincidían. La diferencia máxima frente a la conversión de texto mediante `float` era de 3.552713678800501e-15 grados. El hash binario correctamente rechazó esos resultados.
+
+La transformación 2 usa `float` de Python sobre cada coordenada del CSV y almacena `float64`; rechaza valores ausentes, no numéricos, no finitos o fuera de rango. Se aplica a latitud y longitud para definir una sola regla de conversión, sin reducir precisión mediante redondeo. Referencia del conversor: https://docs.python.org/3.12/library/functions.html#float.
+
+Los manifiestos `-v2.json` conservan fuentes, conteos y hashes de todos los viajes; cambian la transformación, el hash/tamaño del catálogo y la versión global de datos. Los manifiestos anteriores se conservan sin cambios para trazabilidad de los runs históricos. Usar una versión antigua contra un catálogo ya reparado producirá una discrepancia esperada.
+
+`repair-stations --manifest <manifiesto-v2>` comprueba todos los demás archivos y reconstruye únicamente el catálogo, verificando el candidato antes del reemplazo. No salta la integridad de viajes ni altera el manifiesto. `reproduce` con v2 permite una reconstrucción completa desde las fuentes exactas.

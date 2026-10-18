@@ -39,6 +39,21 @@ reports/figures/         # Figuras
 
 `data/` está excluido de Git y no aparece en el clon inicial; la ingesta crea sus directorios automáticamente. Los notebooks usarán nombres como `1.0-dsr-exploracion.ipynb`. La lógica final debe estar en el módulo `mibici`.
 
+## Actualización del catálogo para Windows y macOS
+
+La transformación 2 convierte latitud y longitud desde el texto del CSV mediante `float` de Python y almacena `float64`, sin redondear coordenadas. Corrige diferencias de precisión detectadas entre entornos con las mismas versiones de pandas y PyArrow. Los manifiestos `-v2.json` identifican la nueva versión; los anteriores se conservan como evidencia histórica y requieren el código original para reconstruirse.
+
+Si ya procesaste los 24 meses con la versión anterior, actualiza el código y repara únicamente el catálogo:
+
+```bash
+python -m mibici.dataset repair-stations --manifest references/data-manifest-2024-10_2026-09-v2.json
+python -m mibici.dataset verify --manifest references/data-manifest-2024-10_2026-09-v2.json
+```
+
+`repair-stations` no usa red ni vuelve a generar viajes. Verifica todos los originales y Parquet de viajes contra los hashes publicados, reconstruye el catálogo desde su CSV original y exige el hash v2 antes de reemplazar el archivo anterior. Ante cualquier otra discrepancia se detiene. Si usaste una ubicación personalizada, incluye `--data-dir` en ambos comandos. Si faltan meses, usa `reproduce` con el manifiesto v2; reutiliza los CSV cuyo hash coincide.
+
+La validación de portabilidad ejecuta pruebas y reconstruye el catálogo oficial de 484 estaciones en Windows, Linux y macOS mediante GitHub Actions. El resultado de cada ejecución debe consultarse en el PR; la configuración del workflow por sí sola no acredita que haya pasado.
+
 ## Instalación
 
 Python **3.12** (validado con 3.12.15). Instalación, 37 pruebas y reproducción de P1 verificadas en un clon y entorno nuevos en macOS ARM64; detalle y alcance de la validación en [references/VALIDACION_P1.md](references/VALIDACION_P1.md). Desde un clon del repositorio y la rama de este cambio:
@@ -63,13 +78,13 @@ uv pip compile --universal --python-version 3.12 --no-emit-index-url requirement
 Este es el comando recomendado al clonar: descarga las URLs exactas del manifiesto, verifica sus SHA-256 y reconstruye los Parquet con las mismas versiones y tamaño de lote.
 
 ```bash
-python -m mibici.dataset reproduce --manifest references/data-manifest-2026-09.json
+python -m mibici.dataset reproduce --manifest references/data-manifest-2026-09-v2.json
 ```
 
 Los datos se guardan exclusivamente en `data/`. Si ya existen los CSV, se verifica su hash y se reutilizan. Para verificar archivos y conteos sin red:
 
 ```bash
-python -m mibici.dataset verify --manifest references/data-manifest-2026-09.json
+python -m mibici.dataset verify --manifest references/data-manifest-2026-09-v2.json
 ```
 
 Si falta un archivo o cambia su hash, la verificación falla. Una fuente modificada no se acepta silenciosamente: se requiere generar y revisar una versión nueva. La reconstrucción exige igualdad del manifiesto completo, incluidos hashes de Parquet. La versión de datos está en `data_version` del JSON y podrá registrarse en MLflow.
@@ -126,7 +141,7 @@ Plantilla oficial: [Cookiecutter Data Science](https://cookiecutter-data-science
 Tras instalar el entorno y situarse en un commit del código:
 
 ```bash
-python -m mibici.dataset reproduce --manifest references/data-manifest-2024-10_2026-09.json
+python -m mibici.dataset reproduce --manifest references/data-manifest-2024-10_2026-09-v2.json
 python -m mibici.geography
 python -m mibici.modeling.p1
 python -m mibici.plots
