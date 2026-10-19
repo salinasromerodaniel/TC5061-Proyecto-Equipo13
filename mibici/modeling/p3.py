@@ -46,6 +46,14 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
         data_dir
     )
 
+    report_dir = config.REPORTS_DIR / "p3"
+            
+    report_dir.mkdir(
+                parents=True,
+                exist_ok=True,
+                )
+    
+
     X = features[
         [
             "departures",
@@ -107,13 +115,6 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
     )
 
     plt.close()
-
-    report_dir = config.REPORTS_DIR / "p3"
-        
-    report_dir.mkdir(
-            parents=True,
-            exist_ok=True,
-            )
 
     uri = (
     "sqlite:///" +
