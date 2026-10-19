@@ -1,0 +1,10 @@
+{
+  "question": "P3",
+  "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+  "metrics": {
+    "silhouette_score": 0.32183194922233044,
+    "davies_bouldin_score": 1.0466298768716866,
+    "calinski_harabasz_score": 219.94849776732957
+  },
+  "clusters": 4
+}
