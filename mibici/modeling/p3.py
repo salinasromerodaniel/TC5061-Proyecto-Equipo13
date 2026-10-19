@@ -69,7 +69,7 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
     X_scaled = scaler.fit_transform(X)
 
     model = KMeans(
-        n_clusters=5,
+        n_clusters=4,
         random_state=config.RANDOM_SEED,
         n_init=10,
     )
