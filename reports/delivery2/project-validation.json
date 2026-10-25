@@ -1,0 +1,42 @@
+{
+  "validated_source_commit": "135862d4aee03cdc41554af86ceda8ae4173adcf",
+  "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+  "canonical_search_parent_run_id": "8f09f3642a404fbabff4572ec245b5ea",
+  "selected_reproduction": {
+    "parent_run_id": "518f72dff65d48f1a2045f63e7e4bd72",
+    "run_id": "3d690843ecd04fe29754d96b593b152d",
+    "model_uri": "models:/m-4f5b9ca62ab247ea84349fb10781bedf",
+    "same_split": true,
+    "metrics_exactly_equal": true,
+    "metrics": {
+      "validation_mae": 14.415382009622444,
+      "test_mae": 16.997697788275698,
+      "test_rmse": 28.37620450115585,
+      "test_wape": 0.15135152356460618
+    }
+  },
+  "project_contract_runs": {
+    "ingest_verify": "86295ee87c864e369dce779af38f1abe",
+    "p2_baseline_parent": "12d05a8ded0a4388bbdb348b2ccd5aa0",
+    "p3_kmeans_parent": "4fd8292cecff4463829c58336ab3a4df"
+  },
+  "clean_clone": {
+    "platform": "macOS ARM64",
+    "python": "3.12.15",
+    "rebuilt_months": 24,
+    "verified_raw_cache_reused": true,
+    "fresh_environment_and_tracking": true,
+    "identical_p1_metrics": true,
+    "parent_run_id": "e3a2c525b40743878638aa802647dd0c"
+  },
+  "ci": {
+    "url": "https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/40227832428",
+    "platforms": [
+      "Windows",
+      "Linux",
+      "macOS"
+    ],
+    "scope": "Pinned environment, catalog integration, tests and real MLflow Project HTTP CLI with synthetic trips; full 24-month reconstruction validated separately on macOS."
+  },
+  "registry_status": "pending_part_c"
+}

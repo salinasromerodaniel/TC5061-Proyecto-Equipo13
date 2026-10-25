@@ -220,3 +220,6 @@ nomenclatura_*.csv
 # Salidas locales de las pruebas de integración de otras preguntas
 /reports/delivery2/p2/
 /reports/delivery2/p3/
+
+# Repetición local del modelo elegido
+/reports/delivery2/p1-selected/
