@@ -1,0 +1,14 @@
+{
+  "question": "P2",
+  "registered_model_name": "mibici-equipo13-p2-riesgo",
+  "experiment": "mibici-equipo13",
+  "run_id": "114fecaa1a12412d83b6d056619a3115",
+  "model_uri": "models:/m-f245ef29b3334cc1b125e8f3b2aec9cf",
+  "model": "logistic",
+  "git_commit": "d2001c212b95b30e276439fa5c9dd95d03dcadb3",
+  "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+  "selection_metric": "validation_f1",
+  "validation_f1": 0.6074498567335244,
+  "test_f1": 0.6385964912280702,
+  "registry_status": "pending_part_c"
+}
