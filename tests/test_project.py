@@ -113,6 +113,7 @@ def test_mlflow_project_ingest_http_smoke(tmp_path, monkeypatch):
     env["PATH"] = str(Path(sys.executable).parent) + os.pathsep + env["PATH"]
     env["MLFLOW_TRACKING_URI"] = f"http://127.0.0.1:{port}"
     env["MLFLOW_DISABLE_AGENT_HINT"] = "1"
+    env["PYTHONUTF8"] = "1"
     server_output = (tmp_path / "server.log").open("w")
     server = subprocess.Popen([sys.executable, "-m", "mlflow", "server", "--backend-store-uri",
         "sqlite:///" + str(tmp_path / "tracking.db"), "--host", "127.0.0.1", "--port", str(port),
@@ -132,7 +133,7 @@ def test_mlflow_project_ingest_http_smoke(tmp_path, monkeypatch):
         run = subprocess.run([sys.executable, "-m", "mlflow", "run", ".", "--env-manager=local",
             "--experiment-name", config.PROJECT_EXPERIMENT, "--run-name", "test_ingest_contract",
             "-e", "ingest", "-P", "mode=verify", "-P", f"manifest={path}", "-P", f"data_dir={data}"],
-            cwd=config.PROJ_ROOT, env=env, capture_output=True, text=True, timeout=90)
+            cwd=config.PROJ_ROOT, env=env, capture_output=True, text=True, encoding="utf-8", timeout=90)
         assert run.returncode == 0, run.stdout + run.stderr
     finally:
         if os.name == "nt":
