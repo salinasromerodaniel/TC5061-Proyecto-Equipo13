@@ -1,4 +1,4 @@
-name: Dataset portability
+name: Reproducible MLflow Project
 on:
   pull_request:
   push:
@@ -25,3 +25,4 @@ jobs:
       - run: python -m pytest -q -W error::DeprecationWarning
         env:
           MIBICI_CATALOG_INTEGRATION: '1'
+          MIBICI_PROJECT_INTEGRATION: '1'

@@ -1,30 +1,20 @@
-from pathlib import Path
+"""Despacho común por pregunta; los runners conservan sus contratos y métricas."""
 
-from loguru import logger
-from tqdm import tqdm
-import typer
-
-from mibici.config import MODELS_DIR, PROCESSED_DATA_DIR
-
-app = typer.Typer()
+from mibici.dataset import DataError
 
 
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    features_path: Path = PROCESSED_DATA_DIR / "features.csv",
-    labels_path: Path = PROCESSED_DATA_DIR / "labels.csv",
-    model_path: Path = MODELS_DIR / "model.pkl",
-    # -----------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Training some model...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Modeling training complete.")
-    # -----------------------------------------
-
-
-if __name__ == "__main__":
-    app()
+def dispatch(question, model, parameters, manifest, data_dir, report_dir, parent_id, commit):
+    if question == "p1":
+        from mibici.modeling.p1_candidates import run_candidates
+        return run_candidates(model, parameters, manifest, data_dir, report_dir, parent_id, commit)
+    if question == "p2":
+        from mibici.modeling.p2 import run_p2
+        return run_p2(manifest_path=manifest, data_dir=data_dir, report_dir=report_dir,
+                      model_name=model, model_parameters=parameters)
+    if question == "p3":
+        from mibici.modeling.p3 import run_p3
+        if model != "kmeans":
+            raise DataError("P3 admite kmeans; su responsable incorporará otros candidatos.")
+        return run_p3(manifest_path=manifest, data_dir=data_dir, report_dir=report_dir,
+                      model_parameters=parameters)
+    raise DataError(f"Pregunta desconocida: {question}.")

@@ -1,7 +1,7 @@
 import json
+from pathlib import Path
 import mlflow
 import matplotlib
-import matplotlib.pyplot as plt
 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
@@ -28,9 +28,10 @@ os.environ.setdefault(
 )
 
 matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 def run_p3(manifest_path=config.P1_DATA_MANIFEST,
-           data_dir=config.DATA_DIR):
+           data_dir=config.DATA_DIR, report_dir=None, model_parameters=None, tracking_uri=None):
 
     manifest = read_manifest(manifest_path)
 
@@ -46,7 +47,7 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
         data_dir
     )
 
-    report_dir = config.REPORTS_DIR / "p3"
+    report_dir = Path(report_dir) if report_dir is not None else config.REPORTS_DIR / "p3"
             
     report_dir.mkdir(
                 parents=True,
@@ -68,11 +69,8 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
 
     X_scaled = scaler.fit_transform(X)
 
-    model = KMeans(
-        n_clusters=4,
-        random_state=config.RANDOM_SEED,
-        n_init=10,
-    )
+    parameters = {**config.P3_MODEL_DEFAULTS, **(model_parameters or {})}
+    model = KMeans(**parameters)
 
     labels = model.fit_predict(X_scaled)
 
@@ -116,10 +114,8 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
 
     plt.close()
 
-    uri = (
-    "sqlite:///" +
-    str(config.P1_TRACKING_DB)
-    )
+    uri = tracking_uri or os.getenv("MLFLOW_TRACKING_URI") or (
+        "sqlite:///" + str(config.P1_TRACKING_DB))
 
     mlflow.set_tracking_uri(uri)
 
@@ -130,9 +126,12 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
 
     with mlflow.start_run(
         run_name="P3_kmeans_baseline",
+        nested=mlflow.active_run() is not None,
         tags={
             "team": "13",
             "question": "P3",
+            "model_family": "kmeans",
+            "stage_of_work": "baseline",
             "git_commit": commit,
             "mlflow.source.git.commit": commit,
         },
@@ -145,7 +144,7 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
 
         mlflow.log_param(
             "n_clusters",
-            5,
+            model.n_clusters,
         )
 
         mlflow.log_param(
@@ -153,6 +152,9 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
             manifest["data_version"],
         )
 
+        mlflow.log_params({"seed": parameters["random_state"], "n_init": parameters["n_init"]})
+        mlflow.log_dict(manifest, "data/data_manifest.json")
+        mlflow.log_dict(parameters, "config/model_parameters.json")
         mlflow.log_metrics(metrics)
 
         mlflow.log_artifact(

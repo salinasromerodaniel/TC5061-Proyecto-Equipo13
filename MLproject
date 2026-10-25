@@ -1,0 +1,18 @@
+name: mibici-equipo13
+python_env: python_env.yaml
+entry_points:
+  ingest:
+    parameters:
+      mode: {type: string, default: config}
+      manifest: {type: string, default: config}
+      data_dir: {type: string, default: config}
+    command: "python -m mibici.project ingest --mode {mode} --manifest {manifest} --data-dir {data_dir}"
+  train:
+    parameters:
+      question: {type: string, default: config}
+      model: {type: string, default: config}
+      params_file: {type: string, default: config}
+      manifest: {type: string, default: config}
+      data_dir: {type: string, default: config}
+      report_dir: {type: string, default: config}
+    command: "python -m mibici.project train --question {question} --model {model} --params-file {params_file} --manifest {manifest} --data-dir {data_dir} --report-dir {report_dir}"
