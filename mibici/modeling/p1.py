@@ -45,7 +45,7 @@ def regression_metrics(actual, predictions):
 
 def code_commit():
     """Exigir que el código y dependencias ejecutados correspondan al commit registrado."""
-    paths = ["mibici", "requirements.in", "requirements.txt", "pyproject.toml"]
+    paths = ["mibici", "requirements.in", "requirements.txt", "pyproject.toml", "MLproject", "python_env.yaml"]
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=config.PROJ_ROOT,
                                      text=True).strip()
     if subprocess.run(["git", "diff", "--quiet", "HEAD", "--", *paths],

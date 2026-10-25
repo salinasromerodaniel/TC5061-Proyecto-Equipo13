@@ -83,7 +83,7 @@ def confusion_figure(actual, predictions, path, title):
 
 def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
            tracking_uri=None, report_dir=config.P2_REPORT_DIR,
-           boundary_manifest=config.P1_BOUNDARY_MANIFEST):
+           boundary_manifest=config.P1_BOUNDARY_MANIFEST, model_name=None, model_parameters=None):
     """Verificar datos, ajustar solo con train y registrar dos runs reproducibles."""
     import mlflow
     import mlflow.sklearn
@@ -138,10 +138,18 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
     mlflow.set_experiment(config.P2_EXPERIMENT)
     models = {
         "dummy_most_frequent": DummyClassifier(strategy="most_frequent"),
-        "random_forest": RandomForestClassifier(
-            n_estimators=200, max_depth=12, min_samples_leaf=5,
-            class_weight="balanced", random_state=config.RANDOM_SEED, n_jobs=-1),
+        "random_forest": RandomForestClassifier(**config.P2_MODEL_DEFAULTS),
     }
+    if model_name not in (None, "baseline", "dummy_most_frequent", "random_forest"):
+        raise ValueError("P2 admite baseline, dummy_most_frequent o random_forest.")
+    if model_name == "baseline":
+        models = {"dummy_most_frequent": models["dummy_most_frequent"]}
+    elif model_name is not None:
+        models = {model_name: models[model_name]}
+    if model_parameters:
+        if len(models) != 1:
+            raise ValueError("Selecciona un modelo P2 antes de indicar hiperparámetros.")
+        next(iter(models.values())).set_params(**model_parameters)
     comparisons = []
     for name, model in models.items():
         model_dir = report_dir / name
@@ -166,7 +174,9 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
             params.update({f"{split}_{key}": value for key, value in details.items()})
         with mlflow.start_run(
                 run_name=f"P2_Zapopan_{name}_{manifest['months'][0]}_{manifest['months'][-1]}",
+                nested=mlflow.active_run() is not None,
                 tags={"team": "13", "question": "P2", "git_commit": commit,
+                      "model_family": name, "stage_of_work": "baseline" if name.startswith("dummy") else "candidate",
                       "mlflow.source.git.commit": commit, "target_kind": "indirect_proxy",
                       "capacity_reference": "2026-09_retrospective",
                       "municipality": "Zapopan"}) as run:
