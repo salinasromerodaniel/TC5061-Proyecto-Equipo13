@@ -25,6 +25,11 @@ def candidate_features(panel):
     return features[config.P1_CANDIDATE_FEATURES]
 
 
+def relative_improvement(reference, value):
+    """Sin porcentaje definido cuando el error de referencia ya es cero."""
+    return None if reference == 0 else 100 * (reference - value) / reference
+
+
 def candidate_specs(model_name, parameters):
     if model_name not in ("hgb-search", "hgb", "baseline"):
         raise DataError("P1 admite hgb-search, hgb o baseline.")
@@ -176,8 +181,8 @@ def run_candidates(model_name, parameters, manifest_path, data_dir, report_dir, 
             mlflow.log_metrics({**test_metrics, "load_and_batch_predict_seconds": inference_seconds})
             record.update(test_metrics)
             record["load_and_batch_predict_seconds"] = inference_seconds
-            record["test_mae_improvement_pct"] = 100 * (records[0]["test_mae"] - record["test_mae"]) / records[0]["test_mae"]
-            record["validation_mae_improvement_pct"] = 100 * (records[0]["validation_mae"] - record["validation_mae"]) / records[0]["validation_mae"]
+            record["test_mae_improvement_pct"] = relative_improvement(records[0]["test_mae"], record["test_mae"])
+            record["validation_mae_improvement_pct"] = relative_improvement(records[0]["validation_mae"], record["validation_mae"])
             frame = panel.loc[masks["test"], ["station_id", "week_start", "departures"]].copy()
             frame["prediction"] = reloaded
             for figure in performance_figures(frame, report_dir / "plots", name):

@@ -79,3 +79,66 @@ def test_dispatch_passes_parameters_to_p2_p3(monkeypatch, tmp_path):
     assert captured[1]["model_parameters"] == {"n_clusters": 3}
     with pytest.raises(DataError):
         train.dispatch("p3", "unknown", {}, tmp_path, tmp_path, tmp_path, "p", "c")
+
+
+def test_relative_improvement_handles_perfect_baseline():
+    from mibici.modeling.p1_candidates import relative_improvement
+    assert relative_improvement(10, 8) == pytest.approx(20)
+    assert relative_improvement(0, 0) is None
+    assert relative_improvement(0, 1) is None
+
+
+def test_mlflow_project_ingest_http_smoke(tmp_path, monkeypatch):
+    """El CLI real debe encontrar Python y retomar el run de Project en cada OS."""
+    import os
+    import signal
+    import socket
+    import subprocess
+    import sys
+    import time
+    import urllib.request
+    from mibici import dataset as ds
+    from test_dataset import fixtures
+    if os.environ.get("MIBICI_PROJECT_INTEGRATION") != "1":
+        pytest.skip("Activar MIBICI_PROJECT_INTEGRATION=1 para probar CLI y servidor HTTP")
+    _, sources = fixtures(tmp_path, monkeypatch)
+    data = tmp_path / "data"
+    manifest = ds.build_manifest(None, sources, data, ["2026-09"], 1)
+    path = tmp_path / "manifest.json"
+    ds.save_manifest(manifest, path)
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        port = sock.getsockname()[1]
+    env = os.environ.copy()
+    env["PATH"] = str(Path(sys.executable).parent) + os.pathsep + env["PATH"]
+    env["MLFLOW_TRACKING_URI"] = f"http://127.0.0.1:{port}"
+    env["MLFLOW_DISABLE_AGENT_HINT"] = "1"
+    server_output = (tmp_path / "server.log").open("w")
+    server = subprocess.Popen([sys.executable, "-m", "mlflow", "server", "--backend-store-uri",
+        "sqlite:///" + str(tmp_path / "tracking.db"), "--host", "127.0.0.1", "--port", str(port),
+        "--workers", "1"], cwd=tmp_path, env=env, stdout=server_output,
+        stderr=subprocess.STDOUT, start_new_session=os.name != "nt")
+    try:
+        for _ in range(120):
+            if server.poll() is not None:
+                raise AssertionError((tmp_path / "server.log").read_text())
+            try:
+                if urllib.request.urlopen(env["MLFLOW_TRACKING_URI"] + "/health", timeout=1).status == 200:
+                    break
+            except OSError:
+                time.sleep(.25)
+        else:
+            raise AssertionError("MLflow test server did not become ready")
+        run = subprocess.run([sys.executable, "-m", "mlflow", "run", ".", "--env-manager=local",
+            "--experiment-name", config.PROJECT_EXPERIMENT, "--run-name", "test_ingest_contract",
+            "-e", "ingest", "-P", "mode=verify", "-P", f"manifest={path}", "-P", f"data_dir={data}"],
+            cwd=config.PROJ_ROOT, env=env, capture_output=True, text=True, timeout=90)
+        assert run.returncode == 0, run.stdout + run.stderr
+    finally:
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/PID", str(server.pid), "/T", "/F"],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+        else:
+            os.killpg(server.pid, signal.SIGTERM)
+        server.wait(timeout=15)
+        server_output.close()

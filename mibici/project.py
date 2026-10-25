@@ -20,6 +20,8 @@ def read_parameters(value):
     content = json.loads(Path(value).read_text(encoding="utf-8"))
     if not isinstance(content, dict):
         raise dataset.DataError("params_file debe contener un objeto JSON.")
+    if "random_state" in content:
+        raise dataset.DataError("La semilla común se configura en config.py, no en params_file.")
     return content
 
 

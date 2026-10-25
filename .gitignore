@@ -216,3 +216,7 @@ nomenclatura_*.csv
 *.parquet
 
 *.part
+
+# Salidas locales de las pruebas de integración de otras preguntas
+/reports/delivery2/p2/
+/reports/delivery2/p3/
