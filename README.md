@@ -166,7 +166,7 @@ carga del modelo y la igualdad de predicciones. Las carpetas `plots/`, `data/`,
 `config/` y `evaluation/` organizan los artefactos; no se registran usuarios.
 
 Resultados: `reports/delivery2/p2/comparison.csv`, `results.json`,
-`split_metadata.json` y `registry_handoff.json`. Este último entrega a C el modelo
-cargable y su linaje; no implica que ya esté registrado ni promovido a producción.
+`split_metadata.json`. `results.json` identifica el elegido, su URI, corrida,
+commit y versión de datos. El registro y la producción corresponden a la Parte C.
 Una reproducción crea runIDs y tiempos nuevos. Los detalles y límites de P2 se
 encuentran en [references/P2.md](references/P2.md).

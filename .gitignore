@@ -221,7 +221,6 @@ nomenclatura_*.csv
 /reports/delivery2/p2/*
 !/reports/delivery2/p2/comparison.csv
 !/reports/delivery2/p2/results.json
-!/reports/delivery2/p2/registry_handoff.json
 !/reports/delivery2/p2/split_metadata.json
 /reports/delivery2/p3/
 

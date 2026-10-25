@@ -1,6 +1,6 @@
 """P2: déficit neto semanal indirecto; nunca stockouts observados.
 
-Ejecutar desde un commit: python -m mibici.modeling.p2
+Parte B: mlflow run . --env-manager=local --experiment-name mibici-equipo13 -e train -P question=p2 -P model=search
 """
 
 import argparse
@@ -11,7 +11,6 @@ import platform
 import time
 
 import numpy as np
-
 import pandas as pd
 import pyarrow.parquet as pq
 
@@ -68,36 +67,45 @@ def classification_metrics(actual, predictions, scores):
     return result
 
 
-def confusion_figure(actual, predictions, path, title):
+def performance_figure(actual, prediction, scores, path, title):
+    """Matriz de confusión y curva precisión-recall del mismo conjunto."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    from sklearn.metrics import ConfusionMatrixDisplay
+    from sklearn.metrics import ConfusionMatrixDisplay, PrecisionRecallDisplay
 
-    fig, ax = plt.subplots(figsize=(6, 5))
-    ConfusionMatrixDisplay.from_predictions(actual, predictions, labels=[0, 1],
-                                            display_labels=["Sin proxy", "Con proxy"], ax=ax,
-                                            colorbar=False)
-    ax.set(title=title, xlabel="Predicción", ylabel="Etiqueta indirecta observada")
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    ConfusionMatrixDisplay.from_predictions(actual, prediction, labels=[0, 1],
+        display_labels=["Sin proxy", "Con proxy"], ax=axes[0], colorbar=False)
+    PrecisionRecallDisplay.from_predictions(actual, scores, ax=axes[1])
+    axes[1].axhline(float(actual.mean()), color="grey", linestyle="--", label="Prevalencia")
+    axes[1].legend()
+    fig.suptitle(title)
     fig.tight_layout()
     fig.savefig(path, dpi=150)
     plt.close(fig)
 
 
-def precision_recall_figure(actual, scores, path, title):
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    from sklearn.metrics import PrecisionRecallDisplay
+def make_model(family, parameters):
+    """Construir únicamente los tres tipos de modelo usados por P2."""
+    from sklearn.dummy import DummyClassifier
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
 
-    fig, ax = plt.subplots(figsize=(6, 5))
-    PrecisionRecallDisplay.from_predictions(actual, scores, ax=ax)
-    ax.axhline(float(actual.mean()), color="grey", linestyle="--", label="Prevalencia")
-    ax.set(title=title)
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(path, dpi=150)
-    plt.close(fig)
+    if family == "dummy_most_frequent":
+        model = DummyClassifier(strategy="most_frequent")
+    elif family == "random_forest":
+        model = RandomForestClassifier(**config.P2_MODEL_DEFAULTS)
+    elif family == "logistic":
+        model = Pipeline([("scale", StandardScaler()),
+                          ("model", LogisticRegression(**config.P2_LOGISTIC_DEFAULTS))])
+    else:
+        raise ValueError(f"Modelo P2 desconocido: {family}.")
+    if any(key.endswith("random_state") for key in parameters):
+        raise ValueError("La semilla P2 se configura en config.py.")
+    return model.set_params(**parameters)
 
 
 def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
@@ -107,11 +115,6 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
     import mlflow
     import mlflow.sklearn
     import sklearn
-    from sklearn.dummy import DummyClassifier
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.pipeline import Pipeline
-    from sklearn.preprocessing import StandardScaler
     from mlflow.models import infer_signature
     from sklearn.metrics import classification_report, confusion_matrix
 
@@ -159,20 +162,6 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
         mlflow.create_experiment(config.P2_EXPERIMENT,
                                 artifact_location=config.P2_ARTIFACT_DIR.resolve().as_uri())
     mlflow.set_experiment(config.P2_EXPERIMENT)
-    def make_model(family, overrides):
-        if family == "dummy_most_frequent":
-            estimator = DummyClassifier(strategy="most_frequent")
-        elif family == "random_forest":
-            estimator = RandomForestClassifier(**config.P2_MODEL_DEFAULTS)
-        elif family == "logistic":
-            estimator = Pipeline([("scale", StandardScaler()),
-                                  ("model", LogisticRegression(**config.P2_LOGISTIC_DEFAULTS))])
-        else:
-            raise ValueError(f"Modelo P2 desconocido: {family}.")
-        if any(key.endswith("random_state") for key in overrides):
-            raise ValueError("La semilla P2 se configura en config.py.")
-        return estimator.set_params(**overrides)
-
     if model_name == "search":
         if model_parameters:
             raise ValueError("La búsqueda P2 usa P2_SEARCH_CONFIGS; params_file es para un modelo.")
@@ -185,10 +174,9 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
     else:
         family = "dummy_most_frequent" if model_name == "baseline" else model_name
         specs = [(family, family, model_parameters or {})]
-    models = {name: (make_model(family, overrides), family)
-              for name, family, overrides in specs}
     comparisons = []
-    for name, (model, family) in models.items():
+    for name, family, parameters in specs:
+        model = make_model(family, parameters)
         model_dir = report_dir / name
         model_dir.mkdir(parents=True, exist_ok=True)
         (model_dir / "plots").mkdir(exist_ok=True)
@@ -246,14 +234,12 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
                 mlflow.log_dict(classification_report(frame.target, prediction, labels=[0, 1],
                                                       output_dict=True, zero_division=0),
                                 f"evaluation/{split}_classification_report.json")
-                confusion_figure(frame.target, prediction, model_dir / "plots" / f"{split}_confusion.png",
-                                 f"P2 {name} · {split}")
                 output = frame[["station_id", "week_start", "target_week", "target"]].copy()
                 output["prediction"] = prediction
                 output["score"] = scores
                 output.to_csv(model_dir / f"{split}_predictions.csv", index=False)
-                precision_recall_figure(frame.target, scores,
-                    model_dir / "plots" / f"{split}_precision_recall.png", f"P2 {name} · {split}")
+                performance_figure(frame.target, prediction, scores,
+                    model_dir / "plots" / f"{split}.png", f"P2 {name} · {split}")
             mlflow.log_metrics(metrics)
             mlflow.log_input(mlflow.data.from_pandas(X_train, source=str(manifest_path),
                 name="p2_training_features"), context="training")
@@ -300,23 +286,18 @@ def run_p2(manifest_path=config.P2_DATA_MANIFEST, data_dir=config.DATA_DIR,
             row["validation_f1_improvement_percent"] = (
                 100 * row["validation_f1_improvement"] / baseline["validation_f1"]
                 if baseline["validation_f1"] else None)
-    handoff = {"question": "P2", "registered_model_name": "mibici-equipo13-p2-riesgo",
-        "experiment": config.P2_EXPERIMENT, "run_id": selected_row["run_id"],
-        "model_uri": selected_row["model_uri"], "model": selected, "git_commit": commit,
-        "data_version": manifest["data_version"], "selection_metric": "validation_f1",
-        "validation_f1": selected_row["validation_f1"], "test_f1": selected_row["test_f1"],
-        "registry_status": "pending_part_c"}
-    (report_dir / "registry_handoff.json").write_text(json.dumps(handoff, indent=2) + "\n")
-    if mlflow.active_run():
-        mlflow.log_artifact(str(report_dir / "registry_handoff.json"), "comparison")
     results = {"task": "P2", "target_definition": TARGET,
                "limitation": "No observed stockouts; fixed reference capacity from September 2026",
+               "experiment": config.P2_EXPERIMENT,
+               "parent_run_id": mlflow.active_run().info.run_id if mlflow.active_run() else None,
                "git_commit": commit, "data_version": manifest["data_version"],
                "selected_by_validation_f1": selected, "split_metadata": metadata,
                "models": comparisons}
     pd.DataFrame(comparisons).to_csv(report_dir / "comparison.csv", index=False)
     (report_dir / "results.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
     if mlflow.active_run():
+        mlflow.set_tag("selected_model", selected)
+        mlflow.set_tag("selected_run_id", selected_row["run_id"])
         mlflow.log_artifact(str(report_dir / "comparison.csv"), "comparison")
         mlflow.log_artifact(str(report_dir / "results.json"), "comparison")
     print(pd.DataFrame(comparisons)[["model", "validation_f1", "test_f1"]].to_string(index=False))
