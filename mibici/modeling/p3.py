@@ -130,15 +130,20 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
     config.P1_EXPERIMENT
     )
 
+    stage = (
+            "baseline"
+            if parameters["n_clusters"] == 5
+            else "candidate"
+        ),
 
     with mlflow.start_run(
-        run_name="P3_kmeans_baseline",
+        run_name=f"P3_kmeans_k{parameters['n_clusters']}",
         nested=mlflow.active_run() is not None,
         tags={
             "team": "13",
             "question": "P3",
             "model_family": "kmeans",
-            "stage_of_work": "baseline",
+            "stage_of_work": stage,
             "git_commit": commit,
             "mlflow.source.git.commit": commit,
         },
