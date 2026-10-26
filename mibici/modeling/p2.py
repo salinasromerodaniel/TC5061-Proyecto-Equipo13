@@ -128,6 +128,28 @@ def make_model(family, parameters):
     elif family == "random_forest":
         model = RandomForestClassifier(**config.P2_MODEL_DEFAULTS)
     elif family == "logistic":
+        model = Pipeline([("scale", StandardScaler()),
+                          ("model", LogisticRegression(**config.P2_LOGISTIC_DEFAULTS))])
+    else:
+        raise ValueError(f"Modelo P2 desconocido: {family}.")
+    if any(key.endswith("random_state") for key in parameters):
+        raise ValueError("La semilla P2 se configura en config.py.")
+    return model.set_params(**parameters)
+
+
+def make_model(family, parameters):
+    """Construir únicamente los tres tipos de modelo usados por P2."""
+    from sklearn.dummy import DummyClassifier
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+
+    if family == "dummy_most_frequent":
+        model = DummyClassifier(strategy="most_frequent")
+    elif family == "random_forest":
+        model = RandomForestClassifier(**config.P2_MODEL_DEFAULTS)
+    elif family == "logistic":
         model = Pipeline(
             [
                 ("scale", StandardScaler()),
@@ -251,6 +273,7 @@ def run_p2(
         model = make_model(family, parameters)
         model_dir = report_dir / name
         model_dir.mkdir(parents=True, exist_ok=True)
+        (model_dir / "plots").mkdir(exist_ok=True)
         (model_dir / "plots").mkdir(exist_ok=True)
         params = {
             **{
