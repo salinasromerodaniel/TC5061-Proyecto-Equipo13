@@ -1,6 +1,6 @@
 """P2: déficit neto semanal indirecto; nunca stockouts observados.
 
-Ejecutar desde un commit: python -m mibici.modeling.p2
+Parte B: mlflow run . --env-manager=local --experiment-name mibici-equipo13 -e train -P question=p2 -P model=search
 """
 
 import argparse
@@ -8,7 +8,9 @@ import json
 import os
 from pathlib import Path
 import platform
+import time
 
+import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 
@@ -24,7 +26,6 @@ TARGET = "next_week_departures_minus_arrivals_ge_positive_reference_capacity"
 
 def weekly_counts(manifest, data_dir):
     """Sumar llegadas y salidas por sus fechas respectivas en lotes mensuales."""
-    # Procesar por lotes para no cargar todos los viajes en memoria.
     parts = []
     for entry in manifest["files"]:
         if entry["kind"] != "trips":
@@ -81,33 +82,63 @@ def classification_metrics(actual, predictions, scores):
         "positive_support": int(actual.sum()),
         "rows": len(actual),
     }
-
-    # Esta métrica necesita al menos un caso positivo en la partición.
     if actual.sum() > 0:
         result["average_precision"] = float(average_precision_score(actual, scores))
     return result
 
 
-def confusion_figure(actual, predictions, path, title):
+def performance_figure(actual, prediction, scores, path, title):
+    """Matriz de confusión y curva precisión-recall del mismo conjunto."""
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    from sklearn.metrics import ConfusionMatrixDisplay
+    from sklearn.metrics import ConfusionMatrixDisplay, PrecisionRecallDisplay
 
-    fig, ax = plt.subplots(figsize=(6, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
     ConfusionMatrixDisplay.from_predictions(
         actual,
-        predictions,
+        prediction,
         labels=[0, 1],
         display_labels=["Sin proxy", "Con proxy"],
-        ax=ax,
+        ax=axes[0],
         colorbar=False,
     )
-    ax.set(title=title, xlabel="Predicción", ylabel="Etiqueta indirecta observada")
+    PrecisionRecallDisplay.from_predictions(actual, scores, ax=axes[1])
+    axes[1].axhline(
+        float(actual.mean()), color="grey", linestyle="--", label="Prevalencia"
+    )
+    axes[1].legend()
+    fig.suptitle(title)
     fig.tight_layout()
     fig.savefig(path, dpi=150)
     plt.close(fig)
+
+
+def make_model(family, parameters):
+    """Construir únicamente los tres tipos de modelo usados por P2."""
+    from sklearn.dummy import DummyClassifier
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+
+    if family == "dummy_most_frequent":
+        model = DummyClassifier(strategy="most_frequent")
+    elif family == "random_forest":
+        model = RandomForestClassifier(**config.P2_MODEL_DEFAULTS)
+    elif family == "logistic":
+        model = Pipeline(
+            [
+                ("scale", StandardScaler()),
+                ("model", LogisticRegression(**config.P2_LOGISTIC_DEFAULTS)),
+            ]
+        )
+    else:
+        raise ValueError(f"Modelo P2 desconocido: {family}.")
+    if any(key.endswith("random_state") for key in parameters):
+        raise ValueError("La semilla P2 se configura en config.py.")
+    return model.set_params(**parameters)
 
 
 def run_p2(
@@ -119,20 +150,19 @@ def run_p2(
     model_name=None,
     model_parameters=None,
 ):
-    """Verificar datos, ajustar solo con train y registrar dos runs reproducibles."""
+    """P2: baseline y candidatas comparables; search se anida en el run de Project."""
     import mlflow
     import mlflow.sklearn
     import sklearn
-    from sklearn.dummy import DummyClassifier
-    from sklearn.ensemble import RandomForestClassifier
+    from mlflow.models import infer_signature
     from sklearn.metrics import classification_report, confusion_matrix
 
-    # Verificar los archivos antes de construir variables o entrenar.
+    # Verificar las fuentes antes de construir variables o entrenar.
     commit = code_commit()
     manifest = read_manifest(manifest_path)
     verify_manifest(manifest, data_dir)
 
-    # Contar eventos y localizar las estaciones del municipio.
+    # Preparar el panel municipal conservando las particiones originales.
     counts = weekly_counts(manifest, data_dir)
     stations = pd.read_parquet(Path(data_dir) / "processed" / "stations.parquet")
     geometry, geography = load_boundary(data_dir, boundary_manifest)
@@ -149,8 +179,6 @@ def run_p2(
         config.P2_TEST_WEEKS,
         station_ids=zapopan_ids,
     )
-
-    # Conservar el alcance geográfico junto con las particiones del experimento.
     metadata.update(
         {
             "scope": "inegi_zapopan_reference_polygon_historical_cohort",
@@ -175,8 +203,6 @@ def run_p2(
     metadata["events_outside_zapopan_reference"] = {
         name: int(outside[name].sum()) for name in ("departures", "arrivals")
     }
-
-    # Preparar las salidas y comprobar que entrenamiento contiene ambas clases.
     report_dir = Path(report_dir)
     report_dir.mkdir(parents=True, exist_ok=True)
     (report_dir / "split_metadata.json").write_text(
@@ -187,8 +213,6 @@ def run_p2(
         raise ValueError(
             "Entrenamiento necesita ambas clases; revisar etiqueta y periodo."
         )
-
-    # Respetar el servidor explícito; si no se indicó, usar la configuración local.
     uri = (
         tracking_uri
         or os.getenv("MLFLOW_TRACKING_URI")
@@ -201,32 +225,39 @@ def run_p2(
             artifact_location=config.P2_ARTIFACT_DIR.resolve().as_uri(),
         )
     mlflow.set_experiment(config.P2_EXPERIMENT)
-
-    # Preparar los modelos de esta versión y aplicar parámetros solo a uno elegido.
-    models = {
-        "dummy_most_frequent": DummyClassifier(strategy="most_frequent"),
-        "random_forest": RandomForestClassifier(**config.P2_MODEL_DEFAULTS),
-    }
-    if model_name not in (None, "baseline", "dummy_most_frequent", "random_forest"):
-        raise ValueError("P2 admite baseline, dummy_most_frequent o random_forest.")
-    if model_name == "baseline":
-        models = {"dummy_most_frequent": models["dummy_most_frequent"]}
-    elif model_name is not None:
-        models = {model_name: models[model_name]}
-    if model_parameters:
-        if len(models) != 1:
+    # La búsqueda usa combinaciones fijadas en config.py para facilitar su comparación.
+    if model_name == "search":
+        if model_parameters:
             raise ValueError(
-                "Selecciona un modelo P2 antes de indicar hiperparámetros."
+                "La búsqueda P2 usa P2_SEARCH_CONFIGS; params_file es para un modelo."
             )
-        next(iter(models.values())).set_params(**model_parameters)
+        specs = [("dummy_most_frequent", "dummy_most_frequent", {})]
+        specs += [
+            (item["name"], item["family"], item["parameters"])
+            for item in config.P2_SEARCH_CONFIGS
+        ]
+    elif model_name is None:
+        specs = [
+            ("dummy_most_frequent", "dummy_most_frequent", {}),
+            ("random_forest", "random_forest", {}),
+        ]
+    else:
+        family = "dummy_most_frequent" if model_name == "baseline" else model_name
+        specs = [(family, family, model_parameters or {})]
 
-    # Evaluar cada modelo sobre las mismas particiones temporales.
+    # Entrenar cada alternativa con los mismos ejemplos y registrar una corrida hija.
     comparisons = []
-    for name, model in models.items():
+    for name, family, parameters in specs:
+        model = make_model(family, parameters)
         model_dir = report_dir / name
         model_dir.mkdir(parents=True, exist_ok=True)
+        (model_dir / "plots").mkdir(exist_ok=True)
         params = {
-            **model.get_params(),
+            **{
+                key: value
+                for key, value in model.get_params(deep=True).items()
+                if isinstance(value, (str, int, float, bool, type(None)))
+            },
             "model": name,
             "seed": config.RANDOM_SEED,
             "data_start_month": manifest["months"][0],
@@ -258,7 +289,7 @@ def run_p2(
                 "team": "13",
                 "question": "P2",
                 "git_commit": commit,
-                "model_family": name,
+                "model_family": family,
                 "stage_of_work": (
                     "baseline" if name.startswith("dummy") else "candidate"
                 ),
@@ -268,18 +299,28 @@ def run_p2(
                 "municipality": "Zapopan",
             },
         ) as run:
-            # Ajustar solo con entrenamiento; validación y prueba no entrenan.
-            model.fit(train[features], train.target)
+            # Ajustar únicamente con entrenamiento; el escalado queda dentro del modelo.
+            X_train = train[features].astype(float)
+            started = time.perf_counter()
+            model.fit(X_train, train.target)
+            fit_seconds = time.perf_counter() - started
             mlflow.log_params(params)
-
-            # Evaluar cada partición y guardar sus predicciones y gráficas.
-            metrics = {}
+            metrics = {"fit_seconds": fit_seconds}
             for split in ("validation", "test"):
                 frame = panel[panel.split == split]
-                prediction = model.predict(frame[features])
-                scores = model.predict_proba(frame[features])[
-                    :, list(model.classes_).index(1)
-                ]
+                X = frame[features].astype(float)
+                started = time.perf_counter()
+                prediction = model.predict(X)
+                scores = model.predict_proba(X)[:, list(model.classes_).index(1)]
+                metrics[f"{split}_predict_seconds"] = time.perf_counter() - started
+                if split == "validation":
+                    weekly_f1 = [
+                        classification_metrics(
+                            frame.target.iloc[pos], prediction[pos], scores[pos]
+                        )["f1"]
+                        for pos in frame.groupby("target_week").indices.values()
+                    ]
+                    metrics["validation_week_f1_std"] = float(np.std(weekly_f1))
                 metrics.update(
                     {
                         f"{split}_{key}": value
@@ -302,26 +343,44 @@ def run_p2(
                     ),
                     f"evaluation/{split}_classification_report.json",
                 )
-                confusion_figure(
-                    frame.target,
-                    prediction,
-                    model_dir / f"{split}_confusion.png",
-                    f"P2 {name} · {split}",
-                )
                 output = frame[
                     ["station_id", "week_start", "target_week", "target"]
                 ].copy()
                 output["prediction"] = prediction
                 output["score"] = scores
                 output.to_csv(model_dir / f"{split}_predictions.csv", index=False)
+                performance_figure(
+                    frame.target,
+                    prediction,
+                    scores,
+                    model_dir / "plots" / f"{split}.png",
+                    f"P2 {name} · {split}",
+                )
 
-            # Registrar los resultados y archivos necesarios para auditarlos.
+            # Conservar resultados, datos de origen y configuración como artefactos.
             mlflow.log_metrics(metrics)
+            mlflow.log_input(
+                mlflow.data.from_pandas(
+                    X_train, source=str(manifest_path), name="p2_training_features"
+                ),
+                context="training",
+            )
+            mlflow.log_dict(params, "config/effective.json")
+            for filename in (
+                "MLproject",
+                "python_env.yaml",
+                "requirements.txt",
+                "mibici/config.py",
+            ):
+                mlflow.log_artifact(str(config.PROJ_ROOT / filename), "config")
             if hasattr(model, "feature_importances_"):
                 pd.DataFrame(
                     {"feature": features, "importance": model.feature_importances_}
                 ).to_csv(model_dir / "feature_importance.csv", index=False)
-            mlflow.log_artifacts(str(model_dir), artifact_path="evaluation")
+            for artifact in model_dir.iterdir():
+                if artifact.is_file():
+                    mlflow.log_artifact(str(artifact), "evaluation")
+            mlflow.log_artifacts(str(model_dir / "plots"), "plots")
             mlflow.log_dict(metadata, "evaluation/split_metadata.json")
             mlflow.log_dict(manifest, "data/data_manifest.json")
             mlflow.log_dict(geography, "data/geography_manifest.json")
@@ -334,34 +393,80 @@ def run_p2(
             mlflow.log_artifact(str(config.PROJ_ROOT / "requirements.txt"), "source")
             # Solo se autoriza el árbol del estimador recién entrenado aquí;
             # no se cargan archivos externos ni listas automáticas de tipos.
-            mlflow.sklearn.log_model(
+            # Guardar firma y ejemplo; comprobar después la recuperación del modelo.
+            example = X_train.head(3)
+            info = mlflow.sklearn.log_model(
                 model,
                 name="model",
-                input_example=train[features].head(2),
+                input_example=example,
+                signature=infer_signature(example, model.predict(example)),
+                pip_requirements=str(config.PROJ_ROOT / "requirements.txt"),
                 skops_trusted_types=(
-                    ["sklearn.tree._tree.Tree"] if name == "random_forest" else []
+                    ["sklearn.tree._tree.Tree"] if family == "random_forest" else []
                 ),
             )
-            comparisons.append({"model": name, "run_id": run.info.run_id, **metrics})
+            restored = mlflow.sklearn.load_model(info.model_uri)
+            np.testing.assert_allclose(
+                restored.predict(example), model.predict(example)
+            )
+            mlflow.set_tag("model_reload_verified", "true")
+            comparisons.append(
+                {
+                    "model": name,
+                    "model_family": family,
+                    "run_id": run.info.run_id,
+                    "model_uri": info.model_uri,
+                    "hyperparameters": json.dumps(
+                        model.get_params(deep=True), default=str, sort_keys=True
+                    ),
+                    **metrics,
+                }
+            )
     # Elegir con validación exclusivamente; prueba solo informa desempeño final.
-    selected = max(comparisons, key=lambda row: row["validation_f1"])["model"]
+    selected_row = max(comparisons, key=lambda row: row["validation_f1"])
+    selected = selected_row["model"]
+    baseline = next(
+        (row for row in comparisons if row["model_family"] == "dummy_most_frequent"),
+        None,
+    )
+    if baseline is not None:
+        for row in comparisons:
+            row["validation_f1_improvement"] = (
+                row["validation_f1"] - baseline["validation_f1"]
+            )
+            row["validation_f1_improvement_percent"] = (
+                100 * row["validation_f1_improvement"] / baseline["validation_f1"]
+                if baseline["validation_f1"]
+                else None
+            )
     results = {
         "task": "P2",
         "target_definition": TARGET,
         "limitation": "No observed stockouts; fixed reference capacity from September 2026",
+        "experiment": config.P2_EXPERIMENT,
+        "parent_run_id": (
+            mlflow.active_run().info.run_id if mlflow.active_run() else None
+        ),
         "git_commit": commit,
         "data_version": manifest["data_version"],
         "selected_by_validation_f1": selected,
         "split_metadata": metadata,
         "models": comparisons,
     }
-
-    # Escribir la comparación y la selección para documentación y reproducción.
     pd.DataFrame(comparisons).to_csv(report_dir / "comparison.csv", index=False)
     (report_dir / "results.json").write_text(
         json.dumps(results, indent=2), encoding="utf-8"
     )
-    print(pd.DataFrame(comparisons).to_string(index=False))
+    if mlflow.active_run():
+        mlflow.set_tag("selected_model", selected)
+        mlflow.set_tag("selected_run_id", selected_row["run_id"])
+        mlflow.log_artifact(str(report_dir / "comparison.csv"), "comparison")
+        mlflow.log_artifact(str(report_dir / "results.json"), "comparison")
+    print(
+        pd.DataFrame(comparisons)[["model", "validation_f1", "test_f1"]].to_string(
+            index=False
+        )
+    )
     print(f"Modelo elegido por F1 de validación: {selected}")
     print(f"Resultados: {report_dir}")
     return results

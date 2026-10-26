@@ -82,3 +82,13 @@ P2_MODEL_DEFAULTS = {
     "n_jobs": -1,
 }
 P3_MODEL_DEFAULTS = {"n_clusters": 4, "random_state": RANDOM_SEED, "n_init": 10}
+
+# P2: candidatas adicionales al Dummy de la primera entrega.
+P2_LOGISTIC_DEFAULTS = {"C": 1.0, "max_iter": 2000, "class_weight": "balanced",
+                        "random_state": RANDOM_SEED}
+P2_SEARCH_CONFIGS = [
+    {"name": "rf_200_depth12", "family": "random_forest", "parameters": {}},
+    {"name": "rf_300_depth6", "family": "random_forest",
+     "parameters": {"n_estimators": 300, "max_depth": 6}},
+    {"name": "logistic", "family": "logistic", "parameters": {}},
+]
