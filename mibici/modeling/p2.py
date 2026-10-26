@@ -115,26 +115,6 @@ def performance_figure(actual, prediction, scores, path, title):
     plt.close(fig)
 
 
-def make_model(family, parameters):
-    """Construir únicamente los tres tipos de modelo usados por P2."""
-    from sklearn.dummy import DummyClassifier
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.pipeline import Pipeline
-    from sklearn.preprocessing import StandardScaler
-
-    if family == "dummy_most_frequent":
-        model = DummyClassifier(strategy="most_frequent")
-    elif family == "random_forest":
-        model = RandomForestClassifier(**config.P2_MODEL_DEFAULTS)
-    elif family == "logistic":
-        model = Pipeline([("scale", StandardScaler()),
-                          ("model", LogisticRegression(**config.P2_LOGISTIC_DEFAULTS))])
-    else:
-        raise ValueError(f"Modelo P2 desconocido: {family}.")
-    if any(key.endswith("random_state") for key in parameters):
-        raise ValueError("La semilla P2 se configura en config.py.")
-    return model.set_params(**parameters)
 
 
 def make_model(family, parameters):
