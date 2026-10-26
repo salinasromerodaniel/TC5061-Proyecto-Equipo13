@@ -223,3 +223,6 @@ nomenclatura_*.csv
 
 # Repetición local del modelo elegido
 /reports/delivery2/p1-selected/
+
+# Registro de P2: solo metadatos, sin modelos
+!/reports/delivery2/p2/registry.json
