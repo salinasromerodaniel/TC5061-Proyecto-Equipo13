@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 import mlflow
+import mlflow.sklearn
+from mlflow.models import infer_signature
 import matplotlib
 
 from sklearn.cluster import KMeans
@@ -75,6 +77,11 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
     labels = model.fit_predict(X_scaled)
 
     features["cluster"] = labels
+
+    signature = infer_signature(
+    X,
+    labels
+    )
 
     clusters_path = report_dir / "clusters.csv"
     features.to_csv(clusters_path, index=False)
@@ -157,6 +164,13 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
         mlflow.log_dict(parameters, "config/model_parameters.json")
         mlflow.log_metrics(metrics)
 
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            name="model",
+            signature=signature,
+            input_example=X.head(5),
+        )
+
         mlflow.log_artifact(
             str(artifact),
             artifact_path="figures",
@@ -166,6 +180,12 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
             str(clusters_path),
             artifact_path="data",
         )
+
+        mlflow.log_artifact(
+            str(manifest_path),
+            artifact_path="data",
+        )
+
     result = {
         "question": "P3",
         "data_version": manifest["data_version"],
@@ -182,6 +202,56 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
         encoding="utf-8",
         )
     return result    
+
+def run_p3_search(
+    manifest_path=config.P1_DATA_MANIFEST,
+    data_dir=config.DATA_DIR,
+    report_dir=None,
+):
+    import mlflow
+
+    results = []
+
+    search_space = [4, 5, 6, 7]
+
+    with mlflow.start_run(
+        run_name="P3_kmeans_search",
+        nested=mlflow.active_run() is not None,
+    ):
+
+        mlflow.set_tags(
+            {
+                "question": "P3",
+                "model_family": "kmeans",
+                "stage_of_work": "search",
+            }
+        )
+
+        for k in search_space:
+
+            with mlflow.start_run(
+                run_name=f"P3_kmeans_k{k}",
+                nested=True,
+            ):
+
+                result = run_p3(
+                    manifest_path=manifest_path,
+                    data_dir=data_dir,
+                    report_dir=report_dir,
+                    model_parameters={
+                        "n_clusters": k
+                    }
+                )
+
+                results.append(
+                    {
+                        "k": k,
+                        **result["metrics"],
+                    }
+                )
+
+    return results
+
 
 if __name__ == "__main__":
     print(
