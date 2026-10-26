@@ -218,8 +218,14 @@ nomenclatura_*.csv
 *.part
 
 # Salidas locales de las pruebas de integración de otras preguntas
-/reports/delivery2/p2/
+/reports/delivery2/p2/*
+!/reports/delivery2/p2/comparison.csv
+!/reports/delivery2/p2/results.json
+!/reports/delivery2/p2/split_metadata.json
 /reports/delivery2/p3/
 
 # Repetición local del modelo elegido
 /reports/delivery2/p1-selected/
+
+# Repetición local del modelo seleccionado de P2
+/reports/delivery2/p2-selected/

@@ -142,3 +142,31 @@ Seguimos GitHub Flow con main protegida: una rama por cambio, PR revisado por ot
 Equipo: Daniel Salinas Romero, José Alberto Velázquez Trujillo y Diego Armando Vazquez Calderon. Daniel desarrolla A y B/P1; los otros bloques se integran con sus responsables.
 
 Plantilla oficial Cookiecutter Data Science; procedencia en `references/scaffold-config.json`. Datos, modelos y tracking no se suben al repositorio. La documentación de la primera entrega permanece como referencia histórica.
+
+## Parte B — P2: comparación de candidatas
+
+Con el entorno activo y `MLFLOW_TRACKING_URI` apuntando al servidor del equipo:
+
+```bash
+mlflow run . --env-manager=local --experiment-name mibici-equipo13 --run-name P2_search -e train -P question=p2 -P model=search
+mlflow run . --env-manager=local --experiment-name mibici-equipo13 --run-name P2_selected -e train -P question=p2 -P model=logistic -P params_file=configs/p2/selected.json -P report_dir=reports/delivery2/p2-selected
+```
+
+La búsqueda P2 registra el Dummy original y tres candidatas: RF de 200 árboles y
+profundidad 12, RF de 300 árboles y profundidad 6, y regresión logística balanceada
+con escalado. Las combinaciones se definen en `P2_SEARCH_CONFIGS` de `config.py`.
+La regresión logística se selecciona por F1 de validación: 0.607450 frente a
+0.402189 del baseline; su F1 de prueba es 0.638596. La selección no usa prueba.
+
+Se conservan la cohorte de 73 estaciones, los cortes temporales y la etiqueta
+indirecta de déficit de bicicletas. No se observan inventarios ni stockouts reales.
+Cada hija registra modelo con firma y ejemplo, manifiestos, configuración,
+matrices y curvas precisión-recall, además de métricas y tiempos. Se verifica la
+carga del modelo y la igualdad de predicciones. Las carpetas `plots/`, `data/`,
+`config/` y `evaluation/` organizan los artefactos; no se registran usuarios.
+
+Resultados: `reports/delivery2/p2/comparison.csv`, `results.json`,
+`split_metadata.json`. `results.json` identifica el elegido, su URI, corrida,
+commit y versión de datos. El registro y la producción corresponden a la Parte C.
+Una reproducción crea runIDs y tiempos nuevos. Los detalles y límites de P2 se
+encuentran en [references/P2.md](references/P2.md).
