@@ -134,7 +134,7 @@ def run_p3(manifest_path=config.P1_DATA_MANIFEST,
             "baseline"
             if parameters["n_clusters"] == 5
             else "candidate"
-        ),
+        )
 
     with mlflow.start_run(
         run_name=f"P3_kmeans_k{parameters['n_clusters']}",
