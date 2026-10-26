@@ -1,0 +1,17 @@
+{
+  "name": "mibici-equipo13-p2-riesgo",
+  "version": "1",
+  "alias": "champion",
+  "model_uri": "models:/mibici-equipo13-p2-riesgo@champion",
+  "tracking_uri": "http://127.0.0.1:5014",
+  "experiment": "mibici-equipo13",
+  "run_id": "c4cc9be0d8834978848b9799f8b6e5a2",
+  "git_commit": "790188863115634300a6dd8883fcefbd5d8653f2",
+  "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+  "source_model_uri": "models:/m-f3363d474c0f47f9a305b5c80eb7c931",
+  "alias_load_verified": true,
+  "verification_rows": 3,
+  "predictions_equal": true,
+  "probabilities_equal": true,
+  "scope": "P2 only; local academic registry, not operational deployment"
+}

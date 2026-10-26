@@ -167,6 +167,67 @@ carga del modelo y la igualdad de predicciones. Las carpetas `plots/`, `data/`,
 
 Resultados: `reports/delivery2/p2/comparison.csv`, `results.json`,
 `split_metadata.json`. `results.json` identifica el elegido, su URI, corrida,
-commit y versión de datos. El registro y la producción corresponden a la Parte C.
+commit y versión de datos. El registro y el alias de producción se explican en la sección de Model Registry de P2.
 Una reproducción crea runIDs y tiempos nuevos. Los detalles y límites de P2 se
 encuentran en [references/P2.md](references/P2.md).
+
+## P2 — Registro y uso del modelo seleccionado
+
+### Qué hace cada archivo
+
+| Archivo | Responsabilidad |
+|---|---|
+| `mibici/p2_panel.py` | Prepara los ejemplos por estación y semana y los separa por fecha. |
+| `mibici/modeling/p2.py` | Entrena los modelos disponibles y guarda su evaluación. |
+| `mibici/modeling/p2_registry.py` | Registra la logística elegida y comprueba su carga por alias. |
+| `references/P2.md` | Explica la pregunta, los datos, la etiqueta y sus limitaciones. |
+| `references/ENTREGA2_P2_C.md` | Explica el registro, su ubicación y cómo reproducirlo. |
+
+### Antes de registrar
+
+La Parte B debe estar integrada en la rama utilizada. El servidor debe contener
+la corrida ganadora y sus archivos, y el repositorio debe disponer de
+`reports/delivery2/p2/results.json`. El registro no entrena un modelo nuevo ni
+completa una búsqueda que falte en la rama actual.
+
+Con el entorno del equipo activo, apunta al servidor que conserva esas corridas:
+
+```bash
+export MLFLOW_TRACKING_URI=http://127.0.0.1:5014
+python -m mibici.modeling.p2_registry
+```
+
+### Cargar el ganador
+
+La regresión logística se registró como `mibici-equipo13-p2-riesgo`, versión 1,
+con el alias `champion`. Ese nombre identifica el ganador sin fijar su número
+de versión en el código que lo utiliza.
+
+```python
+import mlflow
+import mlflow.sklearn
+
+mlflow.set_tracking_uri("http://127.0.0.1:5014")
+mlflow.set_registry_uri("http://127.0.0.1:5014")
+
+modelo = mlflow.sklearn.load_model(
+    "models:/mibici-equipo13-p2-riesgo@champion"
+)
+```
+
+El script comprueba la ejecución de origen, reutiliza una versión ya registrada
+y compara las predicciones antes y después de asignar el alias. La evidencia se
+guarda en `reports/delivery2/p2/registry.json`. El registro corresponde a esta
+entrega académica; no representa un servicio de rebalanceo desplegado.
+
+### Dónde está el registro verificado
+
+La comprobación real se realizó en el tracking original de P2, servido en el
+puerto 5014 desde la copia
+`Documents/Codex/2026-10-24/como-x20/work/TC5061-Proyecto-Equipo13`.
+La base de TareasMaestria no se sincroniza automáticamente. Para usar otro
+servidor hay que disponer allí de los experimentos y sus archivos completos.
+El puerto habitual del equipo es 5013: debe cambiarse en los ejemplos solo
+cuando ese servidor contenga realmente las corridas.
+
+Consulta `references/ENTREGA2_P2_C.md` para ver el procedimiento completo.

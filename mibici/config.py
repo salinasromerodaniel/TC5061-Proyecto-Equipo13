@@ -43,11 +43,15 @@ P1_ARTIFACT_DIR = PROJ_ROOT / "mlartifacts"
 P1_COHORT_START_MONTH = "2025-10"
 P1_SEASONAL_WEEKS = 52
 
-# P2: clasificación de riesgo indirecto
+# P2: clasificación de déficit neto semanal indirecto.
 P2_EXPERIMENT = "mibici-equipo13"
 P2_REPORT_DIR = REPORTS_DIR / "p2"
+
+# Reutilizar el tracking del equipo; no crear otra base por pregunta.
 P2_TRACKING_DB = P1_TRACKING_DB
 P2_ARTIFACT_DIR = P1_ARTIFACT_DIR
+
+# Manifiesto de los datos utilizados y tamaño de las particiones temporales.
 P2_DATA_MANIFEST = PROJ_ROOT / "references" / "data-manifest-2024-10_2026-09-v2.json"
 P2_VALIDATION_WEEKS = 8
 P2_TEST_WEEKS = 8
@@ -68,8 +72,15 @@ P1_HGB_DEFAULTS = {"loss": "poisson", "learning_rate": 0.05, "max_iter": 150,
                    "l2_regularization": 1.0, "early_stopping": False,
                    "random_state": RANDOM_SEED}
 P1_HGB_SEARCH = [{"max_leaf_nodes": 7}, {"max_leaf_nodes": 15}, {"max_leaf_nodes": 31}]
-P2_MODEL_DEFAULTS = {"n_estimators": 200, "max_depth": 12, "min_samples_leaf": 5,
-                     "class_weight": "balanced", "random_state": RANDOM_SEED, "n_jobs": -1}
+# Random Forest de referencia de P2. Mantener la semilla común del equipo.
+P2_MODEL_DEFAULTS = {
+    "n_estimators": 200,
+    "max_depth": 12,
+    "min_samples_leaf": 5,
+    "class_weight": "balanced",
+    "random_state": RANDOM_SEED,
+    "n_jobs": -1,
+}
 P3_MODEL_DEFAULTS = {"n_clusters": 4, "random_state": RANDOM_SEED, "n_init": 10}
 
 # P2: candidatas adicionales al Dummy de la primera entrega.
