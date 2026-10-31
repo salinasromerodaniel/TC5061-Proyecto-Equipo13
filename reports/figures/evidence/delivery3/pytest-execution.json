@@ -1,0 +1,18 @@
+{
+  "recorded_at_utc": "2026-10-31T22:11:55.867774+00:00",
+  "platform": "Darwin arm64",
+  "python": "3.12.15",
+  "tests": "Synthetic fixtures; optional network/HTTP integrations disabled for local evidence",
+  "executions": [
+    {
+      "command": "python -m pytest -v tests/test_training_reproducibility.py --no-header -W error::DeprecationWarning",
+      "exit_code": 0,
+      "log": "pytest-reproducibility.txt"
+    },
+    {
+      "command": "python -m pytest -q -ra -W error::DeprecationWarning",
+      "exit_code": 0,
+      "log": "pytest-suite.txt"
+    }
+  ]
+}
