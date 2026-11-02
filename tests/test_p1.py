@@ -142,3 +142,26 @@ def test_two_years_keep_recent_cohort_and_same_validation_test_rows():
 def test_seasonal_baseline_uses_past_or_explicit_fallback():
     panel = pd.DataFrame({"lag_1": [10, 20], "lag_52": [5, np.nan]})
     assert baseline_predictions(panel, "seasonal_52_weeks").tolist() == [5, 20]
+
+
+@pytest.mark.parametrize("window,value", [
+    ("validation_weeks", 0), ("test_weeks", 0),
+    ("history_weeks", 0), ("history_weeks", -1),
+])
+def test_panel_rejects_nonpositive_windows(window, value):
+    with pytest.raises(DataError, match="deben ser positivas"):
+        p1_station_week_panel(counts(), [1], MONTHS, **{window: value})
+
+
+def test_panel_rejects_cohort_without_training_observations():
+    only_future = counts().loc[lambda frame: frame.week_start >= "2026-08-03"]
+    with pytest.raises(DataError, match="historia de entrenamiento"):
+        p1_station_week_panel(only_future, [1], MONTHS)
+
+
+@pytest.mark.parametrize("actual,prediction", [
+    ([], []), ([1, 2], [1]), ([np.inf], [1]), ([np.nan], [1]),
+], ids=["empty", "different_lengths", "infinite_observation", "missing_observation"])
+def test_metrics_reject_empty_mismatched_or_nonfinite_observations(actual, prediction):
+    with pytest.raises(DataError):
+        regression_metrics(actual, prediction)

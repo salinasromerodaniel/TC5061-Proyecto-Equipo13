@@ -1,0 +1,7 @@
+============================= test session starts ==============================
+collecting ... collected 2 items
+
+tests/test_training_reproducibility.py::test_p1_training_reproduces_predictions_and_metrics[partial_annual_history] PASSED [ 50%]
+tests/test_training_reproducibility.py::test_p1_training_reproduces_predictions_and_metrics[missing_annual_history_at_prediction] PASSED [100%]
+
+============================== 2 passed in 1.34s ===============================

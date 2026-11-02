@@ -288,3 +288,19 @@ def test_published_station_catalog_bytes(tmp_path):
     ds.parquet_atomic([ds.normalize_stations(frame)], ds.STATION_SCHEMA,
                       ds.manifest_path(tmp_path, entry["path"]))
     ds.verify_manifest({"files": [raw, entry]}, tmp_path)
+
+
+def test_normalization_accepts_month_edges_and_trip_ending_next_month():
+    frame = trips()
+    frame["Inicio_del_viaje"] = ["2026-09-01 00:00:00", "2026-09-30 23:59:00"]
+    frame["Fin_del_viaje"] = ["2026-09-01 00:10:00", "2026-10-01 00:15:00"]
+    result = ds.normalize_trips(frame, "2026-09")
+    assert result.started_at.tolist() == [
+        pd.Timestamp("2026-09-01 00:00:00"), pd.Timestamp("2026-09-30 23:59:00")]
+    assert result.ended_at.iloc[-1] == pd.Timestamp("2026-10-01 00:15:00")
+
+
+@pytest.mark.parametrize("column", ["Origen_Id", "Fin_del_viaje"])
+def test_normalization_rejects_missing_required_columns(column):
+    with pytest.raises(ds.DataError, match="Se requiere una sola columna"):
+        ds.normalize_trips(trips().drop(columns=column), "2026-09")

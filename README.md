@@ -121,6 +121,68 @@ mlflow run . --env-manager=local --experiment-name mibici-equipo13 --run-name P3
 
 `reports/delivery2/p1/registry_handoff.json` identifica modelo elegido, URI cargable, run, padre, commit, versión de datos y nombre sugerido `mibici-equipo13-p1-demanda`. Este bloque todavía no registra una versión en producción ni asigna alias: corresponde a la parte C. El esquema de ciclo de vida elegido por el equipo y los comandos de carga por nombre deben incorporarse aquí al integrar C.
 
+## Pruebas automatizadas — tercera entrega
+
+Con Python 3.12 y el entorno instalado y activado como se indica arriba, ejecutar
+desde la raíz del repositorio:
+
+```bash
+python -m pytest -q -ra -W error::DeprecationWarning
+```
+
+El comando recolecta las pruebas de `tests/`, incluidas las escritas con
+`unittest.TestCase`. Los datos de los fixtures son sintéticos. La ejecución
+predeterminada no descarga MiBici ni requiere un servidor MLflow; las dos
+integraciones opcionales se omiten salvo que se activen sus variables.
+
+| Función o capacidad | Casos normales | Casos límite y errores |
+|---|---|---|
+| `dataset.normalize_trips` | Tipos y columnas operativas; exclusión de campos personales | Fechas en extremos del mes, viaje que termina en el mes siguiente, columnas requeridas ausentes, valores inválidos y fin anterior al inicio |
+| `features.p1_station_week_panel` | Retardos y particiones temporales | Ventanas no positivas, cohorte sin historia, huecos y estaciones nuevas; una observación futura no altera sus propias variables |
+| `modeling.p1.regression_metrics` | MAE, RMSE y WAPE con valores conocidos | Entrada vacía, longitudes distintas y observaciones/predicciones no finitas; WAPE omitido cuando el volumen observado es cero |
+| Entrenamiento P1 | Dos estimadores independientes con la misma configuración y semilla | Historia anual parcialmente ausente al ajustar y totalmente ausente en las entradas de predicción |
+
+Para ejecutar únicamente la prueba de reproducibilidad:
+
+```bash
+python -m pytest -v tests/test_training_reproducibility.py --no-header -W error::DeprecationWarning
+```
+
+La prueba construye un panel sintético del periodo aprobado de 24 meses, usa las
+funciones de variables del proyecto y la configuración de
+`configs/p1/selected.json`, crea dos estimadores nuevos y ajusta ambos solo con
+entrenamiento. Compara sus predicciones y métricas de validación y prueba con
+tolerancia relativa y absoluta de `1e-12`. También exige salidas finitas,
+no negativas y no constantes. Limita los hilos a uno dentro de la prueba y
+restaura la configuración al salir.
+
+Esto verifica repetibilidad dentro del mismo entorno fijado; no exige identidad
+binaria entre sistemas operativos ni mide el desempeño real de MiBici.
+No se crean runs ni modelos serializados. La matriz de CI existente ejecuta
+estas pruebas en Windows, Linux y macOS.
+
+**Límite detectado:** scikit-learn 1.9.1 falla en el cálculo de bins si una
+variable de entrenamiento contiene únicamente NaN. Un periodo de 12 meses deja
+`lag_52` completamente vacío y reproduce ese problema. Estas pruebas mantienen
+el periodo aprobado de 24 meses, con valores anuales presentes y ausentes en
+entrenamiento; el segundo escenario elimina la historia anual solo al predecir.
+No se acredita aquí entrenamiento con una columna totalmente vacía.
+
+Las capturas siguientes muestran la salida real de las ejecuciones locales,
+renderizada desde los registros de PyTest para facilitar su lectura:
+
+![Suite PyTest](reports/figures/evidence/delivery3/pytest-suite.png)
+
+[Registro de la suite](reports/figures/evidence/delivery3/pytest-suite.txt)
+
+![Reproducibilidad del entrenamiento P1](reports/figures/evidence/delivery3/pytest-reproducibility.png)
+
+[Registro de reproducibilidad](reports/figures/evidence/delivery3/pytest-reproducibility.txt)
+
+Los bloques DeepChecks y seguridad se documentarán con sus propios comandos,
+hallazgos y capturas al integrarse. Estas ejecuciones de PyTest no sustituyen
+esas validaciones.
+
 ## Validación
 
 ```bash
