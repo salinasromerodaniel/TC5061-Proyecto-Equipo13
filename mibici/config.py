@@ -81,3 +81,9 @@ P2_SEARCH_CONFIGS = [
      "parameters": {"n_estimators": 300, "max_depth": 6}},
     {"name": "logistic", "family": "logistic", "parameters": {}},
 ]
+
+DEEPCHECKS_PANEL_PATH = PROCESSED_DATA_DIR / "quality" / "p2_panel.csv"
+DEEPCHECKS_REPORT_DIR = REPORTS_DIR / "deepchecks"
+DEEPCHECKS_MIN_ROWS = 10
+# Umbral exploratorio de revisión, no un estándar universal ni garantía de calidad.
+DEEPCHECKS_DRIFT_THRESHOLD = 0.2

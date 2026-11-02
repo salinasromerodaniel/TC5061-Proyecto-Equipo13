@@ -1,0 +1,11 @@
+# Entorno de validación separado. NO instalar encima de requirements.txt.
+# Pines directos propuestos; comprobar resolución y pip check antes de la evidencia.
+deepchecks==0.19.1
+# Deepchecks importa pkg_resources; setuptools >=82 ya no lo incluye.
+setuptools==80.9.0
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.5.2
+# Exportación local de los paneles reales reutilizando el pipeline del proyecto.
+pyarrow==23.0.1
+shapely==2.2.0

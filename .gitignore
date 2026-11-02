@@ -229,3 +229,6 @@ nomenclatura_*.csv
 
 # Repetición local del modelo seleccionado de P2
 /reports/delivery2/p2-selected/
+
+/reports/deepchecks/
+/.venv-deepchecks/
