@@ -1,0 +1,120 @@
+Run started:2026-11-01 23:10:24.205763+00:00
+
+Test results:
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: mibici\modeling\p1.py:7:0
+6	from pathlib import Path
+7	import subprocess
+8	
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: mibici\modeling\p1.py:49:13
+48	    paths = ["mibici", "requirements.in", "requirements.txt", "pyproject.toml", "MLproject", "python_env.yaml"]
+49	    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=config.PROJ_ROOT,
+50	                                     text=True).strip()
+51	    if subprocess.run(["git", "diff", "--quiet", "HEAD", "--", *paths],
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: mibici\modeling\p1.py:49:13
+48	    paths = ["mibici", "requirements.in", "requirements.txt", "pyproject.toml", "MLproject", "python_env.yaml"]
+49	    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=config.PROJ_ROOT,
+50	                                     text=True).strip()
+51	    if subprocess.run(["git", "diff", "--quiet", "HEAD", "--", *paths],
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: mibici\modeling\p1.py:51:7
+50	                                     text=True).strip()
+51	    if subprocess.run(["git", "diff", "--quiet", "HEAD", "--", *paths],
+52	                      cwd=config.PROJ_ROOT).returncode:
+53	        raise DataError("Guarda el código y dependencias en un commit antes de registrar runs.")
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: mibici\modeling\p1.py:51:7
+50	                                     text=True).strip()
+51	    if subprocess.run(["git", "diff", "--quiet", "HEAD", "--", *paths],
+52	                      cwd=config.PROJ_ROOT).returncode:
+53	        raise DataError("Guarda el código y dependencias en un commit antes de registrar runs.")
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: mibici\modeling\p1.py:54:16
+53	        raise DataError("Guarda el código y dependencias en un commit antes de registrar runs.")
+54	    untracked = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard",
+55	                                        "--", *paths], cwd=config.PROJ_ROOT, text=True)
+56	    if untracked.strip():
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: mibici\modeling\p1.py:54:16
+53	        raise DataError("Guarda el código y dependencias en un commit antes de registrar runs.")
+54	    untracked = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard",
+55	                                        "--", *paths], cwd=config.PROJ_ROOT, text=True)
+56	    if untracked.strip():
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: mibici\project.py:7:0
+6	from pathlib import Path
+7	import subprocess
+8	import sys
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: mibici\project.py:44:15
+43	    if args.entry == "server":
+44	        return subprocess.call([sys.executable, "-m", "mlflow", "server",
+45	                                "--backend-store-uri", "sqlite:///" + str(config.P1_TRACKING_DB),
+46	                                "--host", config.PROJECT_TRACKING_HOST,
+47	                                "--port", str(config.PROJECT_TRACKING_PORT), "--workers", "1"])
+48	    from mibici.tracking import project_run, validate_environment
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 1927
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 9
+		Medium: 0
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 0
+		High: 9
+Files skipped (0):

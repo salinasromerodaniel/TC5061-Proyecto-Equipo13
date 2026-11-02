@@ -1,0 +1,25 @@
+Name    Version   ID              Fix Versions
+------- --------- --------------- ------------
+certifi 2026.7.22 PYSEC-2026-4320 2026.10.18
+certifi 2026.7.22 PYSEC-2026-4320 2026.10.18
+mlflow  3.17.1    CVE-2026-53995  3.17.2
+pip     25.0.1    PYSEC-2026-1795 25.3
+pip     25.0.1    PYSEC-2026-1796 26.0
+pip     25.0.1    PYSEC-2026-2875 26.1
+pip     25.0.1    PYSEC-2026-2876 26.1
+pip     25.0.1    PYSEC-2026-196  26.1.2
+pip     25.0.1    PYSEC-2026-1795 25.3
+pip     25.0.1    PYSEC-2026-1796 26.0
+pip     25.0.1    PYSEC-2026-196  26.1.2
+pip     25.0.1    PYSEC-2026-2875 26.1
+pip     25.0.1    PYSEC-2026-2876 26.1
+pip     25.0.1    PYSEC-2026-3721 26.2
+pip     25.0.1    PYSEC-2026-3721 26.2.0
+pyasn1  0.6.4     CVE-2026-119196 0.6.5
+pyasn1  0.6.4     CVE-2026-119194 0.6.5
+pyasn1  0.6.4     CVE-2026-119197 0.6.5
+pyasn1  0.6.4     CVE-2026-119195 0.6.5
+
+Name   Skip Reason
+------ ---------------------------------------------------------------------
+mibici Dependency not found on PyPI and could not be audited: mibici (0.0.1)
