@@ -263,6 +263,120 @@ El último comando comprueba las tres preguntas; `--question P1`, `P2` o `P3` se
 
 `DRIFT_REQUIRES_REVIEW` significa integridad aprobada y drift pendiente de análisis; no es un fallo de instalación ni una garantía de estabilidad. `--strict-drift` convierte esa alerta en código no cero. Errores de esquema, integridad, procedencia o chequeos no ejecutados siempre producen fallo. En P1 se informa y permite el faltante estructural de `lag_52`, como admite el modelo original. P2 sigue siendo un indicador indirecto, no observaciones de stockouts.
 
+## Pruebas y validación de seguridad
+
+El proyecto incluye pruebas automatizadas y verificaciones básicas de seguridad para garantizar la calidad y confiabilidad del código.
+
+### Ejecutar las pruebas unitarias
+
+Desde la raíz del repositorio:
+
+```bash
+pytest
+```
+
+o para mayor detalle:
+
+```bash
+pytest -v
+```
+
+Las pruebas se encuentran organizadas dentro de la carpeta:
+
+```text
+tests/
+```
+
+e incluyen validaciones de procesamiento de datos, generación de características, utilidades del proyecto y comportamiento esperado de distintos componentes.
+
+---
+
+### Análisis estático de seguridad con Bandit
+
+Instalar Bandit:
+
+```bash
+pip install bandit
+```
+
+Ejecutar el análisis:
+
+```bash
+bandit -r mibici
+```
+
+Generar reporte:
+
+```bash
+bandit -r mibici -f txt -o reports/security/bandit.txt
+```
+
+Este análisis permite identificar posibles riesgos de seguridad en el código fuente, tales como uso inseguro de procesos externos, manejo de archivos o funciones potencialmente peligrosas.
+
+---
+
+### Auditoría de dependencias con pip-audit
+
+Instalar:
+
+```bash
+pip install pip-audit
+```
+
+Ejecutar auditoría:
+
+```bash
+pip-audit
+```
+
+Generar reporte:
+
+```bash
+pip-audit > reports/security/pip-audit.txt
+```
+
+La auditoría identifica vulnerabilidades conocidas en las dependencias instaladas y reporta versiones corregidas cuando están disponibles.
+
+---
+
+### Evidencia
+
+Los resultados de las verificaciones se almacenan en:
+
+```text
+reports/security/
+├── bandit.txt
+├── pip-audit.txt
+└── security_review.md
+```
+
+Estos artefactos documentan:
+
+- Revisión de exposición de credenciales y archivos sensibles.
+- Resultados del análisis estático de seguridad.
+- Auditoría de dependencias.
+- Recomendaciones de remediación.
+
+---
+
+### Buenas prácticas implementadas
+
+El repositorio utiliza `.gitignore` para evitar la publicación accidental de información sensible y artefactos locales, incluyendo:
+
+```text
+.env
+.env.*
+.venv/
+mlruns/
+mlartifacts/
+*.sqlite
+*.pickle
+*.joblib
+*.parquet
+```
+
+*simismo, no se almacen*n credenciales, contraseñas ni sec*etos directamente en el código fue*te*versionado.
+
 Contratos por pregunta, límites, comandos y evidencia solicitada en [references/DEEPCHECKS.md](references/DEEPCHECKS.md).
 
 **Ejecución Windows verificada:** 19 pruebas aprobadas; integridad real aprobada en P1/P2/P3. P1 y P2 emitieron alertas de drift, P3 aprobó su matriz completa. Detalles, límites y capturas pendientes en [references/VALIDACION_DEEPCHECKS.md](references/VALIDACION_DEEPCHECKS.md).
