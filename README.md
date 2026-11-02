@@ -232,3 +232,37 @@ Resultados: `reports/delivery2/p2/comparison.csv`, `results.json`,
 commit y versión de datos. El registro y la producción corresponden a la Parte C.
 Una reproducción crea runIDs y tiempos nuevos. Los detalles y límites de P2 se
 encuentran en [references/P2.md](references/P2.md).
+
+## Validación de datos con Deepchecks (P1, P2 y P3)
+
+La contribución de calidad reutiliza los pipelines del equipo sin entrenar modelos. P1 y P2 comprueban integridad y drift temporal de features/objetivo; P3 comprueba la matriz de estaciones, sin inventar un train/test para su clustering descriptivo. Solo se exportan variables operativas, claves y objetivos, sin datos personales.
+
+Entorno separado de Windows, Python 3.12 (no combinar con `requirements.txt`):
+
+```powershell
+py -3.12 -m venv .venv-deepchecks
+.\.venv-deepchecks\Scripts\python.exe -m pip install -r requirements-deepchecks.txt
+.\.venv-deepchecks\Scripts\python.exe -m pip check
+```
+
+Pruebas de esta contribución con un solo comando:
+
+```powershell
+.\.venv-deepchecks\Scripts\python.exe -m unittest discover -s tests -p test_validation.py -v
+```
+
+Demo opcional: `python -m mibici.validation_tasks check --demo`, usando el Python de ese entorno. La demo no acredita los datos reales. Para los datos reales, disponer de los Parquet de ingesta y preparar explícitamente el polígono si falta:
+
+```powershell
+.\.venv-deepchecks\Scripts\python.exe -m mibici.geography
+.\.venv-deepchecks\Scripts\python.exe -m mibici.validation_tasks export
+.\.venv-deepchecks\Scripts\python.exe -m mibici.validation_tasks check
+```
+
+El último comando comprueba las tres preguntas; `--question P1`, `P2` o `P3` selecciona una. Resultados HTML/JSON y resumen por pregunta en `reports/deepchecks/real_*`. El CSV y su metadata quedan bajo `data/processed/quality/`, con hash verificado. Datos, reportes completos y entorno quedan fuera de Git.
+
+`DRIFT_REQUIRES_REVIEW` significa integridad aprobada y drift pendiente de análisis; no es un fallo de instalación ni una garantía de estabilidad. `--strict-drift` convierte esa alerta en código no cero. Errores de esquema, integridad, procedencia o chequeos no ejecutados siempre producen fallo. En P1 se informa y permite el faltante estructural de `lag_52`, como admite el modelo original. P2 sigue siendo un indicador indirecto, no observaciones de stockouts.
+
+Contratos por pregunta, límites, comandos y evidencia solicitada en [references/DEEPCHECKS.md](references/DEEPCHECKS.md).
+
+**Ejecución Windows verificada:** 19 pruebas aprobadas; integridad real aprobada en P1/P2/P3. P1 y P2 emitieron alertas de drift, P3 aprobó su matriz completa. Detalles, límites y capturas pendientes en [references/VALIDACION_DEEPCHECKS.md](references/VALIDACION_DEEPCHECKS.md).

@@ -1,0 +1,210 @@
+{
+  "upstream_commit": "2d4f05b9889d47e324a8e8a3a930399cb9be9c12",
+  "local_validation_source_sha256": {
+    "mibici/validation.py": "0a3f53e4030cc0d1e75b2144265ca02eb12881111c7cf79dc5d5bcf8f8e656b2",
+    "mibici/validation_tasks.py": "a7e585402fbe161c1d5940fe12fb8f7a6dea35dba331996e9578869d9f862dd8",
+    "tests/test_validation.py": "def47724774290625739d15a7b434e84ca161852247ab8277b647fe1c44ec1e4",
+    "requirements-deepchecks.txt": "b21adeaa068abb11a302fee91489d46a0b1f506b5ab6855a7cbd21e282b475c1"
+  },
+  "tests": {
+    "command": ".venv-deepchecks/Scripts/python.exe -m unittest discover -s tests -p test_validation.py -v",
+    "passed": 19,
+    "failed": 0,
+    "skipped": 0
+  },
+  "pip_check": "No broken requirements found.",
+  "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+  "execution_utc": "2026-11-02T05:03:29.713596Z",
+  "questions": {
+    "P1": {
+      "rows": 7160,
+      "schema_errors": [],
+      "integrity": {
+        "train": {
+          "passed": true,
+          "checks_not_run": 0
+        },
+        "validation": {
+          "passed": true,
+          "checks_not_run": 0
+        },
+        "test": {
+          "passed": true,
+          "checks_not_run": 0
+        }
+      },
+      "drift": {
+        "validation": {
+          "passed": false,
+          "checks_not_run": 0
+        },
+        "test": {
+          "passed": false,
+          "checks_not_run": 0
+        }
+      },
+      "missing_counts": {
+        "station_id": 0,
+        "week_start": 0,
+        "split": 0,
+        "lag_1": 0,
+        "mean_previous_4": 0,
+        "lag_52": 3559,
+        "week_sin": 0,
+        "week_cos": 0,
+        "target": 0
+      },
+      "allowed_missing_features": [
+        "lag_52"
+      ],
+      "versions": {
+        "deepchecks": "0.19.1",
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2"
+      },
+      "drift_excluded_all_missing": {
+        "validation": [],
+        "test": []
+      },
+      "status": "DRIFT_REQUIRES_REVIEW",
+      "drift_conditions": {
+        "validation": {
+          "Feature Drift": [
+            {
+              "Status": "FAIL",
+              "Condition": "categorical drift score < 0.2 and numerical drift score < 0.2",
+              "More Info": "Failed for 2 out of 5 columns.\nFound 2 numeric columns with Kolmogorov-Smirnov above threshold: {'week_sin': '0.46', 'week_cos': '0.92'}"
+            }
+          ],
+          "Label Drift": [
+            {
+              "Status": "PASS",
+              "Condition": "Label drift score < 0.2",
+              "More Info": "Label's drift score Kolmogorov-Smirnov is 0.14"
+            }
+          ]
+        },
+        "test": {
+          "Feature Drift": [
+            {
+              "Status": "FAIL",
+              "Condition": "categorical drift score < 0.2 and numerical drift score < 0.2",
+              "More Info": "Failed for 2 out of 5 columns.\nFound 2 numeric columns with Kolmogorov-Smirnov above threshold: {'week_sin': '0.75', 'week_cos': '0.64'}"
+            }
+          ],
+          "Label Drift": [
+            {
+              "Status": "PASS",
+              "Condition": "Label drift score < 0.2",
+              "More Info": "Label's drift score Kolmogorov-Smirnov is 0.03"
+            }
+          ]
+        }
+      }
+    },
+    "P2": {
+      "rows": 7095,
+      "schema_errors": [],
+      "integrity": {
+        "train": {
+          "passed": true,
+          "checks_not_run": 0,
+          "rows": 5927,
+          "positive_rows": 3083
+        },
+        "validation": {
+          "passed": true,
+          "checks_not_run": 0,
+          "rows": 584,
+          "positive_rows": 147
+        },
+        "test": {
+          "passed": true,
+          "checks_not_run": 0,
+          "rows": 584,
+          "positive_rows": 148
+        }
+      },
+      "drift": {
+        "validation": {
+          "within_threshold": false,
+          "checks_not_run": 0
+        },
+        "test": {
+          "within_threshold": false,
+          "checks_not_run": 0
+        }
+      },
+      "versions": {
+        "deepchecks": "0.19.1",
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2"
+      },
+      "status": "DRIFT_REQUIRES_REVIEW",
+      "drift_conditions": {
+        "validation": {
+          "Feature Drift": [
+            {
+              "Status": "FAIL",
+              "Condition": "categorical drift score < 0.2 and numerical drift score < 0.2",
+              "More Info": "Failed for 2 out of 7 columns.\nFound 2 numeric columns with Kolmogorov-Smirnov above threshold: {'net_flow': '0.24', 'net_flow_mean4': '0.21'}"
+            }
+          ],
+          "Label Drift": [
+            {
+              "Status": "FAIL",
+              "Condition": "Label drift score < 0.2",
+              "More Info": "Label's drift score Cramer's V is 0.27"
+            }
+          ]
+        },
+        "test": {
+          "Feature Drift": [
+            {
+              "Status": "FAIL",
+              "Condition": "categorical drift score < 0.2 and numerical drift score < 0.2",
+              "More Info": "Failed for 2 out of 7 columns.\nFound 2 numeric columns with Kolmogorov-Smirnov above threshold: {'net_flow': '0.26', 'net_flow_mean4': '0.33'}"
+            }
+          ],
+          "Label Drift": [
+            {
+              "Status": "FAIL",
+              "Condition": "Label drift score < 0.2",
+              "More Info": "Label's drift score Cramer's V is 0.27"
+            }
+          ]
+        }
+      }
+    },
+    "P3": {
+      "rows": 484,
+      "schema_errors": [],
+      "integrity": {
+        "full": {
+          "passed": true,
+          "checks_not_run": 0
+        }
+      },
+      "drift": {},
+      "missing_counts": {
+        "station_id": 0,
+        "departures": 0,
+        "arrivals": 0,
+        "traffic": 0,
+        "balance": 0,
+        "capacity": 0
+      },
+      "allowed_missing_features": [],
+      "versions": {
+        "deepchecks": "0.19.1",
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit-learn": "1.5.2"
+      },
+      "drift_not_applicable": "P3 is descriptive clustering of a full-period station matrix; no train/test datasets.",
+      "status": "PASS"
+    }
+  }
+}

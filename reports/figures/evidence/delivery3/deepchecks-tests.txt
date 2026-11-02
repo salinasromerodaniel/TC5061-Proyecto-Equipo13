@@ -1,0 +1,170 @@
+test_p1_and_p3_valid_contracts (test_validation.AllQuestionsContractTests.test_p1_and_p3_valid_contracts) ... ok
+test_p1_rejects_negative_demand (test_validation.AllQuestionsContractTests.test_p1_rejects_negative_demand) ... ok
+test_p1_rejects_overlapping_target_weeks (test_validation.AllQuestionsContractTests.test_p1_rejects_overlapping_target_weeks) ... ok
+test_p3_preserves_zero_capacity_and_signed_balance (test_validation.AllQuestionsContractTests.test_p3_preserves_zero_capacity_and_signed_balance) ... ok
+test_p3_rejects_inconsistent_aggregates_and_extra_columns (test_validation.AllQuestionsContractTests.test_p3_rejects_inconsistent_aggregates_and_extra_columns) ... ok
+test_demo_runs_all_checks_and_creates_reports (test_validation.DeepchecksIntegrationTests.test_demo_runs_all_checks_and_creates_reports) ... C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\serialization\dataframe\html.py:16: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import parse_version
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\sklearn\metrics\_scorer.py:610: FutureWarning: The `needs_threshold` and `needs_proba` parameter are deprecated in version 1.4 and will be removed in 1.6. You can either let `response_method` be `None` or set it to `predict` to preserve the same behaviour.
+  warnings.warn(
+
+P2 integridad train:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P2 integridad validation:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P2 integridad test:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P2 drift train vs validation:
+|     | 0/2 [Time: 00:00]
+P2 drift train vs validation:
+|##5  | 1/2 [Time: 00:00, Check=Feature Drift]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P2 drift train vs test:
+|     | 0/2 [Time: 00:00]
+P2 drift train vs test:
+|##5  | 1/2 [Time: 00:00, Check=Feature Drift]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+ok
+test_duplicate_station_week_is_rejected_by_deepchecks (test_validation.DeepchecksIntegrationTests.test_duplicate_station_week_is_rejected_by_deepchecks) ...
+P2 integridad train:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P2 integridad validation:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P2 integridad test:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P2 drift train vs validation:
+|     | 0/2 [Time: 00:00]
+P2 drift train vs validation:
+|##5  | 1/2 [Time: 00:00, Check=Feature Drift]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P2 drift train vs test:
+|     | 0/2 [Time: 00:00]
+P2 drift train vs test:
+|##5  | 1/2 [Time: 00:00, Check=Feature Drift]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+ok
+test_p1_real_suites_allow_expected_seasonal_missingness (test_validation.DeepchecksIntegrationTests.test_p1_real_suites_allow_expected_seasonal_missingness) ...
+P1 integridad train:
+|     | 0/3 [Time: 00:00]
+P1 integridad train:
+|#####| 3/3 [Time: 00:00, Check=Percent Of Nulls]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P1 integridad validation:
+|     | 0/3 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P1 integridad test:
+|     | 0/3 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P1 drift train vs validation:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P1 drift train vs test:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+ok
+test_p1_unexpected_null_is_rejected (test_validation.DeepchecksIntegrationTests.test_p1_unexpected_null_is_rejected) ...
+P1 integridad train:
+|     | 0/3 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P1 integridad validation:
+|     | 0/3 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P1 integridad test:
+|     | 0/3 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P1 drift train vs validation:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+
+P1 drift train vs test:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+ok
+test_p3_duplicate_station_is_rejected (test_validation.DeepchecksIntegrationTests.test_p3_duplicate_station_is_rejected) ...
+P3 integridad full:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+ok
+test_p3_has_no_fabricated_drift_or_label (test_validation.DeepchecksIntegrationTests.test_p3_has_no_fabricated_drift_or_label) ...
+P3 integridad full:
+|     | 0/2 [Time: 00:00]
+
+C:\Users\Jose A\Documents\Codex\2026-10-18\referenced-chatgpt-conversation-this-is-an\TC5061-Proyecto-Equipo13\.venv-deepchecks\Lib\site-packages\deepchecks\core\suite.py:393: DeprecationWarning: keys will default to True in jsonpickle 5.0.0
+  return jsonpickle.dumps(
+ok
+test_invalid_target_and_infinity (test_validation.ValidationContractTests.test_invalid_target_and_infinity) ... ok
+test_missing_column (test_validation.ValidationContractTests.test_missing_column) ... ok
+test_numeric_null_is_retained_for_deepchecks (test_validation.ValidationContractTests.test_numeric_null_is_retained_for_deepchecks) ... ok
+test_numeric_type_is_not_silently_coerced (test_validation.ValidationContractTests.test_numeric_type_is_not_silently_coerced) ... ok
+test_schema_failure_is_nonzero_and_saved (test_validation.ValidationContractTests.test_schema_failure_is_nonzero_and_saved) ... ok
+test_temporal_overlap_and_horizon (test_validation.ValidationContractTests.test_temporal_overlap_and_horizon) ... ok
+test_unexpected_column_never_reaches_report (test_validation.ValidationContractTests.test_unexpected_column_never_reaches_report) ... ok
+test_valid_panel (test_validation.ValidationContractTests.test_valid_panel) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 16.807s
+
+OK
