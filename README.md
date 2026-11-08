@@ -32,6 +32,8 @@ La [verificación del modelo real](reports/delivery4/p1-api-verification.json)
 incluye la petición y respuesta HTTP. Las pruebas se ejecutan con
 `python -m pytest tests/test_api.py -q -W error::DeprecationWarning`.
 
+[Estado de CI y disponibilidad del catálogo histórico](references/API_P1.md#estado-de-la-integración-externa-8-de-noviembre-de-2026).
+
 Este bloque cubre recuperación y API. Los puntos de validación de dominio,
 contenedor, prueba desde el contenedor y documentación final se integran con
 los responsables correspondientes.

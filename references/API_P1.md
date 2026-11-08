@@ -173,3 +173,22 @@ código necesario, excluyendo secretos y datasets.
 
 Fuentes técnicas: [MLflow Model Registry](https://mlflow.org/docs/latest/ml/model-registry/workflow/),
 [FastAPI lifespan](https://fastapi.tiangolo.com/advanced/events/).
+
+## Estado de la integración externa (8 de noviembre de 2026)
+
+La ejecución [42536585381](https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/42536585381)
+aprobó 113 pruebas en cada sistema (Windows, Linux y macOS), incluida la API,
+y falló únicamente en `test_published_station_catalog_bytes`: la URL histórica
+`nomenclatura_2026_09.csv` responde HTTP404. Hay seis pruebas opcionales omitidas.
+
+El [portal oficial](https://www.mibici.net/es/datos-abiertos/) enlaza ahora el
+catálogo de octubre, cuyos bytes no coinciden con el hash histórico. Se conserva
+la versión de datos anterior. La recuperación de una versión ya registrada y
+el paquete de inferencia funcionan con independencia de esa descarga.
+
+Para reconstruir el dataset desde cero mientras falte el catálogo histórico,
+se requiere una copia de septiembre verificable con el SHA-256 del manifiesto:
+`206e45fe633922b634d858142fa21e6fd9f4c421b6435c02980ef290cc2df90d`.
+La copia local existente se verificó. Las pruebas y los hashes originales se
+mantienen; el resultado global de CI requiere resolver esa disponibilidad
+externa. Detalle en [validation.json](../reports/delivery4/validation.json).
