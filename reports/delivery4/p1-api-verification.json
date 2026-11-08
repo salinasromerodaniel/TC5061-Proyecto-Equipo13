@@ -1,0 +1,36 @@
+{
+  "transport": "HTTP local Uvicorn, no container",
+  "request": {
+    "instances": [
+      {
+        "lag_1": 100,
+        "mean_previous_4": 95,
+        "lag_52": null,
+        "week_sin": 0.5,
+        "week_cos": 0.8660254037844386
+      },
+      {
+        "lag_1": 35,
+        "mean_previous_4": 40,
+        "lag_52": 38,
+        "week_sin": 0.5,
+        "week_cos": 0.8660254037844386
+      }
+    ]
+  },
+  "status_code": 200,
+  "response": {
+    "predictions": [
+      97.32063540421066,
+      40.5381610212305
+    ],
+    "model": {
+      "name": "mibici-equipo13-p1-demanda",
+      "version": "1",
+      "run_id": "65ed8a9510984cf2aedde1663050440a",
+      "git_commit": "33f9d899fd27e173624c615a808b9c629a627cfe",
+      "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+    }
+  },
+  "matches_downloaded_registry_model": true
+}

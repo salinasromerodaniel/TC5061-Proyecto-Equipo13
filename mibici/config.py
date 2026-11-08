@@ -87,3 +87,7 @@ DEEPCHECKS_REPORT_DIR = REPORTS_DIR / "deepchecks"
 DEEPCHECKS_MIN_ROWS = 10
 # Umbral exploratorio de revisión, no un estándar universal ni garantía de calidad.
 DEEPCHECKS_DRIFT_THRESHOLD = 0.2
+
+# Entrega4: recuperación del Registry y servicio P1.
+API_MODEL_NAME = "mibici-equipo13-p1-demanda"
+API_MODEL_DIR = MODELS_DIR / "serving" / "p1"

@@ -2,6 +2,40 @@
 
 Proyecto integrador de TC5061: demanda semanal P1, riesgo indirecto P2 y agrupación de estaciones P3. Repositorio público: https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13.
 
+## API REST P1 — recuperación del modelo y FastAPI
+
+El servicio de demanda semanal recupera una versión del Model Registry y prepara
+un paquete local con linaje y hashes. FastAPI carga ese paquete al arrancar y
+responde por `POST /predict`; `GET /health` informa qué versión está sirviendo.
+
+Con el entorno activado y la versión disponible en el Registry:
+
+```bash
+export MLFLOW_TRACKING_URI=http://127.0.0.1:5013
+python -m mibici.serving download --name mibici-equipo13-p1-demanda --version 1 --output models/serving/p1
+python -m uvicorn mibici.api:app --host 127.0.0.1 --port 8013
+```
+
+En otra terminal:
+
+```bash
+curl --fail-with-body -H "Content-Type: application/json" --data-binary @examples/p1-predict.json http://127.0.0.1:8013/predict
+```
+
+En Windows configura `$env:MLFLOW_TRACKING_URI = "http://127.0.0.1:5013"` y usa
+`curl.exe`. Documentación interactiva: http://127.0.0.1:8013/docs.
+`MIBICI_MODEL_DIR` configura la ruta al paquete descargado. Cada Registry tiene
+sus propias versiones; utiliza la versión que exista en el del equipo.
+
+[Contrato, procedencia, respuesta real, registro y reproducción desde clon limpio](references/API_P1.md).
+La [verificación del modelo real](reports/delivery4/p1-api-verification.json)
+incluye la petición y respuesta HTTP. Las pruebas se ejecutan con
+`python -m pytest tests/test_api.py -q -W error::DeprecationWarning`.
+
+Este bloque cubre recuperación y API. Los puntos de validación de dominio,
+contenedor, prueba desde el contenedor y documentación final se integran con
+los responsables correspondientes.
+
 ## Estado de la segunda entrega
 
 La parte A incorpora MLflow Project, entorno fijo, servidor local con SQLite y entradas parametrizadas para las tres preguntas. La parte B de P1 compara un baseline y tres candidatos con nested runs, modelos cargables, firma, ejemplo, manifiesto, configuración y gráficas. La experimentación adicional de P2/P3 y el registro de los tres ganadores en producción se incorporan por sus responsables.
