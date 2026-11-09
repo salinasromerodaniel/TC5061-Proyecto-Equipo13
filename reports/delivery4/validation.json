@@ -19,6 +19,7 @@
     "current_october_catalog_has_different_sha256": true
   },
   "scope": "Points 1 and 2: registered model retrieval and local FastAPI. Container build/test and capture pending with team.",
+  "followup_container_evidence": "p1-container-verification.json",
   "previous_ci": {
     "run_url": "https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/42536585381",
     "platforms": [
