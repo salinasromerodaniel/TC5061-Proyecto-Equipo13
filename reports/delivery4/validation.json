@@ -35,10 +35,17 @@
     "api_and_registry_tests": "passed on all three platforms"
   },
   "ci": {
-    "status": "fix pending remote verification",
-    "historical_catalog_source": "protected GitHub Actions snapshot verified against unchanged manifest",
+    "status": "success",
+    "run_url": "https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/42538352067",
+    "validated_commit": "f218b12df16bbf5af578e9d7d1faf8dd6b357318",
+    "platforms": [
+      "Windows",
+      "Linux",
+      "macOS"
+    ],
     "catalog_integration_enabled": true,
-    "processed_catalog_hash_check_enabled": true
+    "processed_catalog_hash_check_enabled": true,
+    "historical_catalog_source": "protected snapshot of the original CSV; unchanged size and SHA-256"
   },
   "catalog_snapshot_tests_added": 9
 }
