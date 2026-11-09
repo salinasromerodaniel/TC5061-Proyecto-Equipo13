@@ -1,0 +1,18 @@
+{
+  "instances": [
+    {
+      "lag_1": 100,
+      "mean_previous_4": 95,
+      "lag_52": null,
+      "week_sin": 0.5,
+      "week_cos": 0.8660254037844386
+    },
+    {
+      "lag_1": 35,
+      "mean_previous_4": 40,
+      "lag_52": 38,
+      "week_sin": 0.5,
+      "week_cos": 0.8660254037844386
+    }
+  ]
+}

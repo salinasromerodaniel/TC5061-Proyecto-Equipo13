@@ -1,0 +1,51 @@
+{
+  "service_code_commit": "5ab684ca0a387af74fbf4635eed5c5ff77c9890d",
+  "local": {
+    "passed": 123,
+    "skipped": 6,
+    "subtests_passed": 2,
+    "api_tests_passed": 16,
+    "real_registry_model": "models:/mibici-equipo13-p1-demanda/1",
+    "real_http_predict_status": 200,
+    "predictions_match_direct_load": true,
+    "integrations_enabled": [
+      "historical_catalog",
+      "mlflow_project_http"
+    ]
+  },
+  "historical_catalog": {
+    "expected_sha256": "206e45fe633922b634d858142fa21e6fd9f4c421b6435c02980ef290cc2df90d",
+    "existing_local_cache_verified": true,
+    "current_october_catalog_has_different_sha256": true
+  },
+  "scope": "Points 1 and 2: registered model retrieval and local FastAPI. Container build/test and capture pending with team.",
+  "previous_ci": {
+    "run_url": "https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/42536585381",
+    "platforms": [
+      "Windows",
+      "Linux",
+      "macOS"
+    ],
+    "passed_per_platform": 113,
+    "failed_per_platform": 1,
+    "skipped_per_platform": 6,
+    "failing_test": "tests/test_dataset.py::test_published_station_catalog_bytes",
+    "failure": "HTTP 404 fetching the historical September 2026 station catalog",
+    "catalog_url": "https://www.mibici.net/site/assets/files/1118/nomenclatura_2026_09.csv",
+    "api_and_registry_tests": "passed on all three platforms"
+  },
+  "ci": {
+    "status": "success",
+    "run_url": "https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/42538352067",
+    "validated_commit": "f218b12df16bbf5af578e9d7d1faf8dd6b357318",
+    "platforms": [
+      "Windows",
+      "Linux",
+      "macOS"
+    ],
+    "catalog_integration_enabled": true,
+    "processed_catalog_hash_check_enabled": true,
+    "historical_catalog_source": "protected snapshot of the original CSV; unchanged size and SHA-256"
+  },
+  "catalog_snapshot_tests_added": 9
+}

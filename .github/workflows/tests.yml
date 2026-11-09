@@ -22,6 +22,10 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - run: python -m pip install --no-deps -e .
       - run: python -m pip check
+      - name: Restore verified historical station catalog
+        run: python .github/scripts/restore_catalog.py --output "${{ runner.temp }}/mibici-catalog/nomenclatura_2026_09.csv"
+        env:
+          MIBICI_CATALOG_ARCHIVE: ${{ secrets.MIBICI_CATALOG_2026_09_GZIP_B64 }}
       - run: python -m pytest -q -W error::DeprecationWarning
         env:
           MIBICI_CATALOG_INTEGRATION: '1'

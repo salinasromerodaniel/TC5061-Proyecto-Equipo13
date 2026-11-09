@@ -17,3 +17,8 @@ shapely>=2,<3
 
 # Evitar avisos de aritmética temporal de pandas 2.3 con NumPy 2.5.
 numpy>=2,<2.4
+
+# Dependencias directas de la API; versiones ya presentes en requirements.txt.
+fastapi==0.143.3
+pydantic==2.14.1
+uvicorn==0.54.0
