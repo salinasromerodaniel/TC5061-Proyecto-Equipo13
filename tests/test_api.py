@@ -177,16 +177,24 @@ def test_api_rejects_malformed_payloads(api_client, payload):
 
 
 @pytest.mark.parametrize("invalid_feature", [
-    {"lag_1": -1}, {"lag_1": True}, {"mean_previous_4": "95"},
-    {"lag_52": -1}, {"week_cos": 1.1}, {"week_sin": 0, "week_cos": 0},
-    {"unexpected": 1}, {"lag_1": float("nan")}, {"lag_1": float("inf")},
+    {"lag_1": -1},
+    {"lag_1": True},
+    {"mean_previous_4": "95"},
+    {"lag_52": -1},
+    {"week_cos": 1.1},
+    {"week_sin": 0, "week_cos": 0},
+    {"unexpected": 1},
+    {"lag_1": float("nan")},
+    {"lag_1": float("inf")},
 ])
 def test_api_rejects_invalid_feature_values(api_client, invalid_feature):
     example = json.loads((config.PROJ_ROOT / "examples/p1-predict.json").read_text())
     example["instances"][0].update(invalid_feature)
-    # requests bloquea NaN e Infinity al usar json=; se prueba el cuerpo HTTP crudo.
+    # El cuerpo HTTP crudo permite comprobar que la API rechaza NaN e Infinity.
     response = api_client.post(
-        "/predict", data=json.dumps(example), headers={"Content-Type": "application/json"}
+        "/predict",
+        data=json.dumps(example),
+        headers={"Content-Type": "application/json"},
     )
     assert response.status_code == 422
     assert response.json()["detail"]
