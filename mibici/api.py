@@ -2,11 +2,15 @@
 
 from contextlib import asynccontextmanager
 import logging
+from math import isclose
 import os
 from pathlib import Path
+from typing import Annotated
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, ConfigDict, Field
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from mibici import config
 from mibici.serving import load_model_bundle
@@ -19,6 +23,7 @@ class P1Features(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
         allow_inf_nan=False,
+        strict=True,
     )
 
     lag_1: float = Field(ge=0)
@@ -35,6 +40,13 @@ class P1Features(BaseModel):
         le=1.0,
     )
 
+    @model_validator(mode="after")
+    def validate_week_phase(self):
+        # Tolerancia para clientes que redondean seno y coseno.
+        if not isclose(self.week_sin**2 + self.week_cos**2, 1, rel_tol=0, abs_tol=1e-3):
+            raise ValueError("week_sin y week_cos deben representar la misma fase semanal.")
+        return self
+
 
 class PredictionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -50,7 +62,9 @@ class ModelIdentity(BaseModel):
 
 
 class PredictionResponse(BaseModel):
-    predictions: list[float]
+    predictions: list[Annotated[float, Field(ge=0, allow_inf_nan=False)]] = Field(
+        min_length=1, max_length=1000
+    )
     model: ModelIdentity
 
 
@@ -66,6 +80,15 @@ def create_app(model_dir=None):
 
     application = FastAPI(title="MiBici P1 — Demanda semanal", version="1.0.0",
                           lifespan=lifespan)
+
+    @application.exception_handler(RequestValidationError)
+    async def invalid_request(_request, error):
+        # El valor rechazado puede ser NaN/Infinity y no se puede serializar como JSON.
+        detail = [
+            {field: item[field] for field in ("loc", "msg", "type")}
+            for item in error.errors()
+        ]
+        return JSONResponse(status_code=422, content={"detail": detail})
 
     @application.get("/health")
     def health():

@@ -1,0 +1,13 @@
+**
+!Containerfile
+!requirements.txt
+!mibici/
+!mibici/**
+!models/
+!models/serving/
+!models/serving/p1/
+!models/serving/p1/**
+**/__pycache__/
+**/*.pyc
+**/.env
+**/.env.*
