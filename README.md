@@ -2,41 +2,108 @@
 
 Proyecto integrador de TC5061: demanda semanal P1, riesgo indirecto P2 y agrupación de estaciones P3. Repositorio público: https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13.
 
-## API REST P1 — recuperación del modelo y FastAPI
+## Entrega 4 · API de demanda semanal P1 con Docker
 
-El servicio de demanda semanal recupera una versión del Model Registry y prepara
-un paquete local con linaje y hashes. FastAPI carga ese paquete al arrancar y
-responde por `POST /predict`; `GET /health` informa qué versión está sirviendo.
+La API estima los viajes iniciados por estación de Zapopan durante la siguiente
+semana. FastAPI carga una versión fija al arrancar y la reutiliza para servir
+peticiones síncronas con hasta 1000 filas. Esto permite consultar estaciones
+cuando sus variables semanales ya están calculadas. El servicio estima demanda
+semanal a partir del historial y del calendario.
 
-Con el entorno activado y la versión disponible en el Registry:
+### 1. Preparar el modelo desde MLflow
+
+Desde la raíz del repositorio, activa el [entorno Python 3.12](#instalación-desde-un-clon-limpio).
+Apunta al Registry que contiene el modelo y descarga su versión registrada.
+El ejemplo supone un servidor local en el puerto 5013 y una versión `1`.
 
 ```bash
 export MLFLOW_TRACKING_URI=http://127.0.0.1:5013
 python -m mibici.serving download --name mibici-equipo13-p1-demanda --version 1 --output models/serving/p1
-python -m uvicorn mibici.api:app --host 127.0.0.1 --port 8013
 ```
 
-En otra terminal:
+En PowerShell configura `$env:MLFLOW_TRACKING_URI = "http://127.0.0.1:5013"`.
+Usa el puerto y la versión de tu Registry. Como alternativa, `--alias NOMBRE`
+resuelve el alias a una versión numérica antes de descargar. Si el destino
+existe, conserva ese paquete y prepara la nueva versión en otro directorio
+antes de colocarla en `models/serving/p1`. Para obtener el modelo con datos
+verificados cuando el Registry del equipo no está disponible, consulta
+[la reproducción de P1](references/API_P1.md#reproducir-desde-un-clon-sin-los-modelos-locales).
+
+El paquete contiene `model/` y `registry.json` con la versión, el linaje y
+los hashes SHA-256. La imagen incorpora ese paquete y comprueba su integridad
+al arrancar. `MLFLOW_TRACKING_URI` se usa durante la preparación en el host.
+El proceso de inferencia puede ejecutarse con el Registry apagado.
+
+### 2. Construir y levantar el servicio
+
+Con Docker activo y el paquete preparado:
 
 ```bash
-curl --fail-with-body -H "Content-Type: application/json" --data-binary @examples/p1-predict.json http://127.0.0.1:8013/predict
+docker build -f Containerfile -t mibici-p1:delivery4 .
+docker run --rm -d --name mibici-p1 -p 127.0.0.1:8000:8000 mibici-p1:delivery4
+docker logs mibici-p1
 ```
 
-En Windows configura `$env:MLFLOW_TRACKING_URI = "http://127.0.0.1:5013"` y usa
-`curl.exe`. Documentación interactiva: http://127.0.0.1:8013/docs.
-`MIBICI_MODEL_DIR` configura la ruta al paquete descargado. Cada Registry tiene
-sus propias versiones; utiliza la versión que exista en el del equipo.
+El contexto de construcción incluye el código de inferencia, las dependencias
+fijas de `requirements.txt` y el paquete P1. El puerto se publica solo en el host
+local. Espera a que Uvicorn confirme que la aplicación inició.
 
-[Contrato, procedencia, respuesta real, registro y reproducción desde clon limpio](references/API_P1.md).
-La [verificación del modelo real](reports/delivery4/p1-api-verification.json)
-incluye la petición y respuesta HTTP. Las pruebas se ejecutan con
-`python -m pytest tests/test_api.py -q -W error::DeprecationWarning`.
+### 3. Consultar la predicción
 
-[Catálogo histórico de CI: restauración e integridad](references/CI_CATALOGO.md).
+```bash
+curl --fail-with-body http://127.0.0.1:8000/health
+curl --fail-with-body -H "Content-Type: application/json" --data-binary "@examples/p1-predict.json" http://127.0.0.1:8000/predict
+```
 
-Este bloque cubre recuperación y API. Los puntos de validación de dominio,
-contenedor, prueba desde el contenedor y documentación final se integran con
-los responsables correspondientes.
+En Windows usa `curl.exe`. Mientras el contenedor esté activo, la documentación
+interactiva de Swagger está en http://127.0.0.1:8000/docs.
+Al terminar, detén el servicio con `docker stop mibici-p1`.
+
+El ejemplo envía dos filas de estación y semana. Cada fila incluye `lag_1`,
+`mean_previous_4`, `lag_52` opcional y el par `week_sin`, `week_cos`.
+Los viajes son números finitos no negativos y el par de calendario debe tener
+norma unitaria dentro de la tolerancia indicada en el contrato. Las entradas
+inválidas reciben HTTP 422. La respuesta incluye las predicciones en el orden
+de entrada y la identidad del modelo con su versión, corrida, commit y datos.
+
+Respuesta HTTP 200 obtenida con ese archivo desde el contenedor:
+
+```json
+{
+  "predictions": [97.32063540421066, 40.5381610212305],
+  "model": {
+    "name": "mibici-equipo13-p1-demanda",
+    "version": "1",
+    "run_id": "01ec9f77835b4cf38601ef75cfd2375f",
+    "git_commit": "0260f9067a427f1ce079b5aa2a3a525ba38df279",
+    "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+  }
+}
+```
+
+### Verificación de la entrega
+
+Se reprodujo la selección de P1 con los datos históricos verificados, se
+registró el HGB Poisson de siete hojas en un Registry local de prueba y se
+descargó por nombre y versión. Esta reproducción tiene su propio identificador
+de corrida. La imagen se construyó y ejecutó con Docker en Ubuntu sobre WSL2
+usando el puerto 18013 en el host. Con el Registry apagado, `GET /health` y
+`POST /predict` devolvieron HTTP 200. Las predicciones coincidieron con la carga
+directa del paquete descargado. Las entradas inválidas devolvieron HTTP 422.
+
+[Captura de Swagger con la respuesta del contenedor](reports/figures/evidence/delivery4/p1-docker-swagger.png) ·
+[Petición, respuesta y metadatos de la prueba Docker](reports/delivery4/p1-container-verification.json).
+
+[Contrato, registro y reproducción](references/API_P1.md).
+[Verificación previa con el modelo real por HTTP](reports/delivery4/p1-api-verification.json).
+
+Pruebas locales de Registry y API:
+
+```bash
+python -m pytest tests/test_api.py -q -W error::DeprecationWarning
+```
+
+[Catálogo histórico de CI y verificación de integridad](references/CI_CATALOGO.md).
 
 ## Estado de la segunda entrega
 
@@ -416,35 +483,3 @@ Asimismo, no se almacenan credenciales, contraseñas ni secretos directamente en
 Contratos por pregunta, límites, comandos y evidencia solicitada en [references/DEEPCHECKS.md](references/DEEPCHECKS.md).
 
 **Ejecución Windows verificada:** 19 pruebas aprobadas; integridad real aprobada en P1/P2/P3. P1 y P2 emitieron alertas de drift, P3 aprobó su matriz completa. Detalles, límites y capturas pendientes en [references/VALIDACION_DEEPCHECKS.md](references/VALIDACION_DEEPCHECKS.md).
-
-## Ejecutar la API en contenedor
-
-### Construir imagen
-
-```bash
-podman build -t mibici-api .
-```
-
-o
-
-```bash
-docker build -t mibici-api .
-```
-
-### Ejecutar contenedor
-
-```bash
-podman run \
--p 8000:8000 \
--e MLFLOW_TRACKING_URI=http://host.containers.internal:5013 \
-mibici-api
-```
-
-o
-
-```bash
-docker run \
--p 8000:8000 \
--e MLFLOW_TRACKING_URI=http://host.containers.internal:5013 \
-mibici-api
-```

@@ -1,0 +1,16 @@
+# Limita el contexto al código, las dependencias y el paquete P1 de inferencia.
+**
+!Containerfile
+!requirements.txt
+!mibici/
+!mibici/**
+!models/
+!models/serving/
+!models/serving/p1/
+!models/serving/p1/**
+
+# Excluye archivos generados y configuraciones locales dentro de esas rutas.
+**/__pycache__/
+**/*.pyc
+**/.env
+**/.env.*

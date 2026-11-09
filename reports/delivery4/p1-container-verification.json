@@ -1,0 +1,126 @@
+{
+  "executed_at": "2026-11-08T22:17:32-06:00",
+  "platform": "Ubuntu on WSL2",
+  "docker_server": "29.8.1",
+  "container_id": "500b75e8b37cc27d68a15a7f4250500e6480a311480ebc5a791fc9180bb3366b",
+  "container_name": "mibici-p1-delivery4-556",
+  "image": {
+    "tag": "mibici-p1:delivery4",
+    "id": "sha256:45ae0288848a981e7f338e2c5b263ab4c234eb5e0f2bdd12486a876d28ed5ba8",
+    "base_digest": "sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b"
+  },
+  "python": "Python 3.12.16",
+  "pip_check": "No broken requirements found.",
+  "registered_uri": "models:/mibici-equipo13-p1-demanda/1",
+  "registry_stopped_before_startup": true,
+  "training": {
+    "selection_metric": "validation_mae",
+    "parent_run_id": "6670a522c1604a8e852dc8e1d8abfa17",
+    "selected_model": "hgb_1_leaves7",
+    "validation_mae": 14.415382009622444,
+    "test_mae": 16.997697788275698
+  },
+  "health": {
+    "url": "http://127.0.0.1:18013/health",
+    "status": 200,
+    "response": {
+      "status": "ok",
+      "model": {
+        "name": "mibici-equipo13-p1-demanda",
+        "version": "1",
+        "run_id": "01ec9f77835b4cf38601ef75cfd2375f",
+        "git_commit": "0260f9067a427f1ce079b5aa2a3a525ba38df279",
+        "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+      }
+    }
+  },
+  "predict": {
+    "url": "http://127.0.0.1:18013/predict",
+    "status": 200,
+    "request": {
+      "instances": [
+        {
+          "lag_1": 100,
+          "mean_previous_4": 95,
+          "lag_52": null,
+          "week_sin": 0.5,
+          "week_cos": 0.8660254037844386
+        },
+        {
+          "lag_1": 35,
+          "mean_previous_4": 40,
+          "lag_52": 38,
+          "week_sin": 0.5,
+          "week_cos": 0.8660254037844386
+        }
+      ]
+    },
+    "response": {
+      "predictions": [
+        97.32063540421066,
+        40.5381610212305
+      ],
+      "model": {
+        "name": "mibici-equipo13-p1-demanda",
+        "version": "1",
+        "run_id": "01ec9f77835b4cf38601ef75cfd2375f",
+        "git_commit": "0260f9067a427f1ce079b5aa2a3a525ba38df279",
+        "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+      }
+    }
+  },
+  "invalid_requests": {
+    "lag_1": {
+      "status": 422,
+      "detail": [
+        {
+          "loc": [
+            "body",
+            "instances",
+            0,
+            "lag_1"
+          ],
+          "msg": "Input should be greater than or equal to 0",
+          "type": "greater_than_equal"
+        }
+      ]
+    },
+    "week_cos": {
+      "status": 422,
+      "detail": [
+        {
+          "loc": [
+            "body",
+            "instances",
+            0
+          ],
+          "msg": "Value error, week_sin y week_cos deben representar la misma fase semanal.",
+          "type": "value_error"
+        }
+      ]
+    },
+    "lag_52": {
+      "status": 422,
+      "detail": [
+        {
+          "loc": [
+            "body",
+            "instances",
+            0,
+            "lag_52"
+          ],
+          "msg": "Input should be a finite number",
+          "type": "finite_number"
+        }
+      ]
+    }
+  },
+  "matches_downloaded_model": true,
+  "matches_previous_host_example": true,
+  "pytest": {
+    "passed": 132,
+    "skipped": 6,
+    "subtests_passed": 2
+  },
+  "screenshot": "reports/figures/evidence/delivery4/p1-docker-swagger.png"
+}

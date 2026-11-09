@@ -1,12 +1,12 @@
 # P1: recuperación del modelo y API FastAPI
 
-Este bloque implementa los puntos 1 y 2 de la entrega. El servicio pronostica
-viajes iniciados por estación de Zapopan para la siguiente semana, a partir de
-variables ya calculadas. No recibe viajes individuales ni calcula inventario.
+El servicio pronostica viajes iniciados por estación de Zapopan para la siguiente
+semana, a partir de variables ya calculadas. Este documento reúne el contrato y
+la preparación del modelo para el [despliegue con Docker](../README.md#entrega-4--api-de-demanda-semanal-p1-con-docker).
 
 ## Modelo y procedencia
 
-Modelo local verificado: `mibici-equipo13-p1-demanda`, versión `1`, HGB Poisson
+Modelo de la verificación HTTP original: `mibici-equipo13-p1-demanda`, versión `1`, HGB Poisson
 con 7 hojas. Procede del run `65ed8a9510984cf2aedde1663050440a`, elegido por MAE
 de validación en la búsqueda `8f09f3642a404fbabff4572ec245b5ea`.
 Commit de entrenamiento: `33f9d899fd27e173624c615a808b9c629a627cfe`.
@@ -46,10 +46,10 @@ y actualiza `MIBICI_MODEL_DIR`.
 El paquete incluye `model/` y `registry.json`, con procedencia y hashes SHA-256.
 Se verifica su integridad antes de cargarlo. Los hashes detectan modificaciones
 accidentales; el paquete debe proceder de un Registry de confianza.
-La API usa ese paquete local y puede arrancar sin conexión a MLflow.
-Esta es la opción del enunciado que permite incorporar a la imagen el modelo
-previamente descargado del Registry. La imagen se construirá con el bloque de
-contenedores del equipo.
+La API usa ese paquete local y puede arrancar sin conexión a MLflow. El
+`Containerfile` incorpora el paquete preparado en `models/serving/p1`.
+La variable `MLFLOW_TRACKING_URI` solo se usa en el host para registrar o
+descargar el modelo.
 
 ## Reproducir desde un clon sin los modelos locales
 
@@ -67,18 +67,21 @@ En otra terminal activa el mismo entorno, configura `MLFLOW_TRACKING_URI` y ejec
 
 ```bash
 mlflow run . --env-manager=local --experiment-name mibici-equipo13 --run-name DATA_reproduce -e ingest
-mlflow run . --env-manager=local --experiment-name mibici-equipo13 --run-name P1_search -e train -P question=p1 -P model=hgb-search
-python -m mibici.serving register --handoff reports/delivery2/p1/registry_handoff.json
+mlflow run . --env-manager=local --experiment-name mibici-equipo13 --run-name P1_search -e train -P question=p1 -P model=hgb-search -P report_dir=reports/delivery2/p1-selected
+python -m mibici.serving register --handoff reports/delivery2/p1-selected/registry_handoff.json
 ```
 
 La búsqueda debe completarse antes de registrar su handoff: ese archivo se
 actualiza con el modelo seleccionado y los identificadores de la nueva ejecución.
+Si ya tienes los datos preparados, puedes reutilizarlos con
+`python -m mibici.project train --question p1 --model hgb-search --data-dir RUTA_DATOS --report-dir reports/delivery2/p1-selected`.
+El entrenamiento verifica esos archivos contra el manifiesto histórico.
 Alternativamente, el registro admite `--source models:/ID_DEL_MODELO`.
 Descarga después la versión que devuelve el registro mediante el comando de la
 sección anterior. La preparación no requiere reentrenar si ya se dispone de una
 versión registrada y accesible.
 
-## Ejecutar y consumir la API
+## Ejecutar la API directamente en el host
 
 ```bash
 python -m uvicorn mibici.api:app --host 127.0.0.1 --port 8013
@@ -86,10 +89,9 @@ curl --fail-with-body http://127.0.0.1:8013/health
 curl --fail-with-body -H "Content-Type: application/json" --data-binary @examples/p1-predict.json http://127.0.0.1:8013/predict
 ```
 
-En Windows usa `curl.exe`. Documentación interactiva: http://127.0.0.1:8013/docs.
-`MIBICI_MODEL_DIR` permite otra ruta al paquete. En un contenedor, el proceso
-Uvicorn deberá escuchar en `0.0.0.0`; el bloque de contenedores definirá el mapeo
-de puerto y la ruta interna al modelo.
+En Windows usa `curl.exe`. Documentación interactiva en http://127.0.0.1:8013/docs.
+`MIBICI_MODEL_DIR` permite otra ruta al paquete. El `Containerfile` escucha
+en `0.0.0.0:8000` dentro del contenedor y usa el paquete incorporado a la imagen.
 
 El modelo se carga durante el arranque. Si falta el paquete o su integridad es
 incorrecta, el servicio no inicia. Las peticiones reutilizan esa instancia.
@@ -114,7 +116,7 @@ Petición `POST /predict`:
 |---|---|
 | lag_1 | Viajes iniciados durante la semana anterior |
 | mean_previous_4 | Media de las cuatro semanas anteriores |
-| lag_52 | Viajes 52 semanas antes; null si no hay esa historia |
+| lag_52 | Viajes 52 semanas antes, opcional o null si falta ese historial |
 | week_sin, week_cos | Calendario de la semana objetivo según candidate_features: fase 2π × (día del año − 1) / 365.2425 |
 
 Cada fila representa una estación y una semana objetivo; se conserva el orden.
@@ -145,9 +147,11 @@ La identidad corresponde al modelo de entrenamiento. El JSON de
 Se usa inferencia síncrona por petición, con hasta 1000 filas, para consultar
 estaciones cuando ya están disponibles sus variables semanales. No supone
 disponibilidad en tiempo real de inventario ni actualiza el modelo con cada
-consulta. El esquema básico rechaza estructuras incompletas, campos extra y
-valores no finitos. El punto 3 del equipo ampliará y documentará las validaciones
-de dominio (rangos, consistencia del calendario y reglas de uso).
+consulta. El esquema exige de 1 a 1000 filas, rechaza campos extra, valores
+no finitos, negativos, booleanos y cadenas numéricas. Seno y coseno deben
+estar en `[-1, 1]` y cumplir `abs(week_sin² + week_cos² - 1) <= 0.001`.
+La respuesta tiene una predicción finita y no negativa por fila. Una petición
+inválida obtiene HTTP 422 con ubicación y motivo de cada error.
 
 ## Pruebas y coordinación
 
@@ -163,13 +167,10 @@ ni requieren Docker. Hay una excepción de advertencia específica para el uso d
 noload de MLflow 3.17 con SQLAlchemy 2.1; las demás deprecaciones siguen tratándose
 como errores.
 
-El Containerfile, su construcción/ejecución y la captura exigida desde el
-contenedor se integran con los puntos 4–6 del equipo. La verificación HTTP
-publicada aquí corresponde a ejecución local sin contenedor.
-
-No se suben modelos, bases, datos ni carpetas de tracking al repositorio.
-El contexto del build deberá incluir únicamente el paquete preparado y el
-código necesario, excluyendo secretos y datasets.
+El README incluye la construcción y ejecución de la imagen. El contexto se
+limita mediante `.dockerignore` al código de inferencia, las dependencias y
+el paquete preparado. El paquete, las bases de datos y el tracking local
+quedan fuera de Git.
 
 Fuentes técnicas: [MLflow Model Registry](https://mlflow.org/docs/latest/ml/model-registry/workflow/),
 [FastAPI lifespan](https://fastapi.tiangolo.com/advanced/events/).
