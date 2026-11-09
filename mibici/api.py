@@ -16,13 +16,24 @@ logger = logging.getLogger(__name__)
 
 class P1Features(BaseModel):
     """Variables ya calculadas para la semana objetivo, en el orden del entrenamiento."""
+    model_config = ConfigDict(
+        extra="forbid",
+        allow_inf_nan=False,
+    )
 
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
-    lag_1: float
-    mean_previous_4: float
-    lag_52: float | None = None
-    week_sin: float
-    week_cos: float
+    lag_1: float = Field(ge=0)
+    mean_previous_4: float = Field(ge=0)
+    lag_52: float | None = Field(default=None, ge=0)
+
+    week_sin: float = Field(
+        ge=-1.0,
+        le=1.0,
+    )
+
+    week_cos: float = Field(
+        ge=-1.0,
+        le=1.0,
+    )
 
 
 class PredictionRequest(BaseModel):

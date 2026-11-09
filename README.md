@@ -411,8 +411,40 @@ mlartifacts/
 *.parquet
 ```
 
-*simismo, no se almacen*n credenciales, contraseñas ni sec*etos directamente en el código fue*te*versionado.
+Asimismo, no se almacenan credenciales, contraseñas ni secretos directamente en el código fuente versionado.
 
 Contratos por pregunta, límites, comandos y evidencia solicitada en [references/DEEPCHECKS.md](references/DEEPCHECKS.md).
 
 **Ejecución Windows verificada:** 19 pruebas aprobadas; integridad real aprobada en P1/P2/P3. P1 y P2 emitieron alertas de drift, P3 aprobó su matriz completa. Detalles, límites y capturas pendientes en [references/VALIDACION_DEEPCHECKS.md](references/VALIDACION_DEEPCHECKS.md).
+
+## Ejecutar la API en contenedor
+
+### Construir imagen
+
+```bash
+podman build -t mibici-api .
+```
+
+o
+
+```bash
+docker build -t mibici-api .
+```
+
+### Ejecutar contenedor
+
+```bash
+podman run \
+-p 8000:8000 \
+-e MLFLOW_TRACKING_URI=http://host.containers.internal:5013 \
+mibici-api
+```
+
+o
+
+```bash
+docker run \
+-p 8000:8000 \
+-e MLFLOW_TRACKING_URI=http://host.containers.internal:5013 \
+mibici-api
+```
