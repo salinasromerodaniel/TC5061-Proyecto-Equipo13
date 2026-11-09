@@ -174,21 +174,19 @@ código necesario, excluyendo secretos y datasets.
 Fuentes técnicas: [MLflow Model Registry](https://mlflow.org/docs/latest/ml/model-registry/workflow/),
 [FastAPI lifespan](https://fastapi.tiangolo.com/advanced/events/).
 
-## Estado de la integración externa (8 de noviembre de 2026)
+## Catálogo histórico y CI
 
-La ejecución [42536585381](https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/42536585381)
-aprobó 113 pruebas en cada sistema (Windows, Linux y macOS), incluida la API,
-y falló únicamente en `test_published_station_catalog_bytes`: la URL histórica
-`nomenclatura_2026_09.csv` responde HTTP404. Hay seis pruebas opcionales omitidas.
+El catálogo histórico de septiembre dejó de estar disponible en su URL original.
+CI restaura una copia exacta del original desde una entrada protegida de GitHub
+Actions, comprueba tamaño y SHA-256 y ejecuta la misma integración que exige
+el Parquet publicado. Los datos y los archivos comprimidos permanecen fuera
+del historial de Git.
 
-El [portal oficial](https://www.mibici.net/es/datos-abiertos/) enlaza ahora el
-catálogo de octubre, cuyos bytes no coinciden con el hash histórico. Se conserva
-la versión de datos anterior. La recuperación de una versión ya registrada y
-el paquete de inferencia funcionan con independencia de esa descarga.
+[Preparación y ejecución de la integración](CI_CATALOGO.md).
+La recuperación del modelo registrado y su paquete de inferencia no dependen
+de la descarga del catálogo. Para reconstruir el dataset desde cero se necesita
+la copia histórica verificada con el manifiesto; no se sustituye por otro mes.
 
-Para reconstruir el dataset desde cero mientras falte el catálogo histórico,
-se requiere una copia de septiembre verificable con el SHA-256 del manifiesto:
-`206e45fe633922b634d858142fa21e6fd9f4c421b6435c02980ef290cc2df90d`.
-La copia local existente se verificó. Las pruebas y los hashes originales se
-mantienen; el resultado global de CI requiere resolver esa disponibilidad
-externa. Detalle en [validation.json](../reports/delivery4/validation.json).
+La [ejecución anterior](https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/42536585381)
+conserva el fallo 404 como antecedente. El resultado de la corrección se registra
+en el PR y en [validation.json](../reports/delivery4/validation.json).

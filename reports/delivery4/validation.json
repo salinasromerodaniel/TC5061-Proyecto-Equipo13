@@ -1,15 +1,25 @@
 {
   "service_code_commit": "5ab684ca0a387af74fbf4635eed5c5ff77c9890d",
   "local": {
-    "passed": 112,
-    "skipped": 8,
+    "passed": 123,
+    "skipped": 6,
     "subtests_passed": 2,
     "api_tests_passed": 16,
     "real_registry_model": "models:/mibici-equipo13-p1-demanda/1",
     "real_http_predict_status": 200,
-    "predictions_match_direct_load": true
+    "predictions_match_direct_load": true,
+    "integrations_enabled": [
+      "historical_catalog",
+      "mlflow_project_http"
+    ]
   },
-  "ci": {
+  "historical_catalog": {
+    "expected_sha256": "206e45fe633922b634d858142fa21e6fd9f4c421b6435c02980ef290cc2df90d",
+    "existing_local_cache_verified": true,
+    "current_october_catalog_has_different_sha256": true
+  },
+  "scope": "Points 1 and 2: registered model retrieval and local FastAPI. Container build/test and capture pending with team.",
+  "previous_ci": {
     "run_url": "https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13/actions/runs/42536585381",
     "platforms": [
       "Windows",
@@ -24,10 +34,11 @@
     "catalog_url": "https://www.mibici.net/site/assets/files/1118/nomenclatura_2026_09.csv",
     "api_and_registry_tests": "passed on all three platforms"
   },
-  "historical_catalog": {
-    "expected_sha256": "206e45fe633922b634d858142fa21e6fd9f4c421b6435c02980ef290cc2df90d",
-    "existing_local_cache_verified": true,
-    "current_october_catalog_has_different_sha256": true
+  "ci": {
+    "status": "fix pending remote verification",
+    "historical_catalog_source": "protected GitHub Actions snapshot verified against unchanged manifest",
+    "catalog_integration_enabled": true,
+    "processed_catalog_hash_check_enabled": true
   },
-  "scope": "Points 1 and 2: registered model retrieval and local FastAPI. Container build/test and capture pending with team."
+  "catalog_snapshot_tests_added": 9
 }

@@ -282,6 +282,11 @@ def test_published_station_catalog_bytes(tmp_path):
     raw = next(f for f in manifest["files"] if f["kind"] == "raw_stations")
     entry = next(f for f in manifest["files"] if f["kind"] == "stations")
     source = ds.manifest_path(tmp_path, raw["path"])
+    cached = os.environ.get("MIBICI_CATALOG_SOURCE")
+    if cached:
+        source.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(cached, source)
+    # download comprueba siempre el hash, tanto en caché como desde el portal.
     with ds.http_session() as session:
         ds.download(session, raw["url"], source, raw["sha256"])
     frame = pd.read_csv(source, encoding=raw["encoding"], sep=raw["delimiter"], dtype="string")
@@ -304,3 +309,14 @@ def test_normalization_accepts_month_edges_and_trip_ending_next_month():
 def test_normalization_rejects_missing_required_columns(column):
     with pytest.raises(ds.DataError, match="Se requiere una sola columna"):
         ds.normalize_trips(trips().drop(columns=column), "2026-09")
+
+
+def test_verified_download_cache_does_not_access_network(tmp_path):
+    class NoNetwork:
+        def get(self, *args, **kwargs):
+            raise AssertionError("Una copia verificada no debe depender del portal.")
+
+    target = tmp_path / "catalog.csv"
+    target.write_bytes(b"synthetic catalog")
+    ds.download(NoNetwork(), "https://example.invalid/catalog.csv", target, ds.sha256_file(target))
+    assert target.read_bytes() == b"synthetic catalog"
