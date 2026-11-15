@@ -483,3 +483,7 @@ Asimismo, no se almacenan credenciales, contraseñas ni secretos directamente en
 Contratos por pregunta, límites, comandos y evidencia solicitada en [references/DEEPCHECKS.md](references/DEEPCHECKS.md).
 
 **Ejecución Windows verificada:** 19 pruebas aprobadas; integridad real aprobada en P1/P2/P3. P1 y P2 emitieron alertas de drift, P3 aprobó su matriz completa. Detalles, límites y capturas pendientes en [references/VALIDACION_DEEPCHECKS.md](references/VALIDACION_DEEPCHECKS.md).
+
+## Monitoreo y drift P1 — Entregable 8
+
+Preparamos la referencia original y octubre de 2026 con cortes congelados y una reserva actual común para A/B. Los comandos, contrato, entorno Evidently y responsabilidades de los bloques siguientes están en [MONITOREO_P1.md](references/MONITOREO_P1.md). El [reporte HTML](reports/monitoring/p1/evidently.html), [resumen](reports/monitoring/p1/summary.json) y [figura](reports/monitoring/p1/drift-quality.png) provienen de la ejecución real. Entrenamiento B, comparación e interpretación final se completan en sus bloques.

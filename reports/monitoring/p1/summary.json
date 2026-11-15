@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "contract_id": "a612f1671df82372b12a15f60135a3bdbc11f1f459909477a671272961ea6465",
+  "evidently_version": "0.7.23",
+  "features": [
+    "lag_1",
+    "mean_previous_4",
+    "lag_52",
+    "week_sin",
+    "week_cos"
+  ],
+  "method": "wasserstein",
+  "threshold": 0.1,
+  "threshold_policy": "exploratory_review_not_retraining_or_promotion_rule",
+  "reference": {
+    "path": "reference.parquet",
+    "rows": 5927,
+    "stations": 73,
+    "weeks": 83,
+    "start": "2024-11-04",
+    "end_exclusive": "2026-06-08",
+    "logical_sha256": "477ea406d4cb42db21213190bbe728fce0cd4afea614c0f29f03a65ea0d542ee"
+  },
+  "current": {
+    "path": "current.parquet",
+    "rows": 234,
+    "stations": 78,
+    "weeks": 3,
+    "start": "2026-10-05",
+    "end_exclusive": "2026-10-26",
+    "logical_sha256": "eea5381011e13e999d6bc3911cc29322ccf798c3845bebc0f5ece791b1045c32"
+  },
+  "drift": [
+    {
+      "feature": "lag_1",
+      "method": "wasserstein",
+      "score": 0.6588508090544689,
+      "threshold": 0.1,
+      "drift_detected": true
+    },
+    {
+      "feature": "mean_previous_4",
+      "method": "wasserstein",
+      "score": 0.5241522437510687,
+      "threshold": 0.1,
+      "drift_detected": true
+    },
+    {
+      "feature": "lag_52",
+      "method": "wasserstein",
+      "score": 0.08133126214618099,
+      "threshold": 0.1,
+      "drift_detected": false
+    },
+    {
+      "feature": "week_sin",
+      "method": "wasserstein",
+      "score": 1.6249254542204905,
+      "threshold": 0.1,
+      "drift_detected": true
+    },
+    {
+      "feature": "week_cos",
+      "method": "wasserstein",
+      "score": 0.7826048209744908,
+      "threshold": 0.1,
+      "drift_detected": true
+    }
+  ],
+  "drifted_features": 4,
+  "quality": {
+    "reference": {
+      "rows": 5927,
+      "duplicate_station_weeks": 0,
+      "features": {
+        "lag_1": {
+          "missing_count": 0,
+          "missing_share": 0.0,
+          "infinite_count": 0,
+          "min": 8.0,
+          "max": 674.0,
+          "mean": 108.63978403914291
+        },
+        "mean_previous_4": {
+          "missing_count": 0,
+          "missing_share": 0.0,
+          "infinite_count": 0,
+          "min": 15.0,
+          "max": 624.5,
+          "mean": 108.97971148979248
+        },
+        "lag_52": {
+          "missing_count": 3462,
+          "missing_share": 0.5841066306731905,
+          "infinite_count": 0,
+          "min": 8.0,
+          "max": 676.0,
+          "mean": 115.86369168356998
+        },
+        "week_sin": {
+          "missing_count": 0,
+          "missing_share": 0.0,
+          "infinite_count": 0,
+          "min": -0.9987283547836282,
+          "max": 0.999210105880544,
+          "mean": 0.14402044998280764
+        },
+        "week_cos": {
+          "missing_count": 0,
+          "missing_share": 0.0,
+          "infinite_count": 0,
+          "min": -0.9989834928833466,
+          "max": 0.999771575129327,
+          "mean": 0.13308823938337214
+        }
+      }
+    },
+    "current": {
+      "rows": 234,
+      "duplicate_station_weeks": 0,
+      "features": {
+        "lag_1": {
+          "missing_count": 0,
+          "missing_share": 0.0,
+          "infinite_count": 0,
+          "min": 31.0,
+          "max": 765.0,
+          "mean": 163.81196581196582
+        },
+        "mean_previous_4": {
+          "missing_count": 0,
+          "missing_share": 0.0,
+          "infinite_count": 0,
+          "min": 24.75,
+          "max": 627.0,
+          "mean": 151.85790598290598
+        },
+        "lag_52": {
+          "missing_count": 18,
+          "missing_share": 0.07692307692307693,
+          "infinite_count": 0,
+          "min": 14.0,
+          "max": 604.0,
+          "mean": 119.22222222222223
+        },
+        "week_sin": {
+          "missing_count": 0,
+          "missing_share": 0.0,
+          "infinite_count": 0,
+          "min": -0.9986074448486638,
+          "max": -0.9572026982628482,
+          "mean": -0.9802828437398979
+        },
+        "week_cos": {
+          "missing_count": 0,
+          "missing_share": 0.0,
+          "infinite_count": 0,
+          "min": 0.05275576833695822,
+          "max": 0.28941837266891457,
+          "mean": 0.17150306801551826
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Current incluye sólo tres semanas y observaciones repetidas de estaciones.",
+    "Calendario concentrado en octubre frente a una referencia de varios meses.",
+    "lag_52 ausente cuando no existía un año de historia; no se imputa para el reporte.",
+    "La cohorte original tiene 78 estaciones: 73 aparecen en train y 78 en current.",
+    "Drift de variables no demuestra deterioro del modelo; falta comparación A/B."
+  ]
+}

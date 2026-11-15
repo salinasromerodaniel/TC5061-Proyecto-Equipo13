@@ -232,3 +232,6 @@ nomenclatura_*.csv
 
 /reports/deepchecks/
 /.venv-deepchecks/
+
+# Entorno aislado de monitoreo
+/.venv-monitoring/
