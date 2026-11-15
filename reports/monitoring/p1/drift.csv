@@ -1,0 +1,6 @@
+feature,method,score,threshold,drift_detected
+lag_1,wasserstein,0.6588508090544689,0.1,True
+mean_previous_4,wasserstein,0.5241522437510687,0.1,True
+lag_52,wasserstein,0.08133126214618099,0.1,False
+week_sin,wasserstein,1.6249254542204905,0.1,True
+week_cos,wasserstein,0.7826048209744908,0.1,True

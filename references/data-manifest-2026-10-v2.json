@@ -1,0 +1,88 @@
+{
+  "chunk_size": 100000,
+  "data_version": "da76e200321e072a38a61f3b60a86df843036e4d1562e38508c385accf3d30fc",
+  "files": [
+    {
+      "bytes": 33941,
+      "delimiter": ",",
+      "encoding": "cp1252",
+      "kind": "raw_stations",
+      "path": "external/nomenclatura_2026_10.csv",
+      "rows": 470,
+      "sha256": "2da38dd60dcc74ccb95eb8ed1572e107cf5af44dfa6c5a4fbfa4e30f94ef7f3e",
+      "source_columns": [
+        "id",
+        "name",
+        "latitude",
+        "longitude",
+        "dpcapacity"
+      ],
+      "url": "https://www.mibici.net/site/assets/files/1118/nomenclatura_2026_10.csv"
+    },
+    {
+      "bytes": 19668,
+      "kind": "stations",
+      "path": "processed/stations.parquet",
+      "rows": 470,
+      "schema": "station_id: int64\nstation_name: string\nlatitude: double\nlongitude: double\ncapacity: int64",
+      "sha256": "229f12046972ad1925e8b7b2f5eb00d8e0a52c82433fa56ae4935cb67208a736"
+    },
+    {
+      "bytes": 55222199,
+      "delimiter": ",",
+      "encoding": "utf-8-sig",
+      "kind": "raw_trips",
+      "month": "2026-10",
+      "path": "raw/datos_abiertos_2026_10.csv",
+      "rows": 635532,
+      "sha256": "0cdfb05299e6db658ac9cc7723494a9704b0749e3671c29c8566826ea889b900",
+      "source_columns": [
+        "Viaje_Id",
+        "Usuario_Id",
+        "Genero",
+        "Año_de_nacimiento",
+        "Inicio_del_viaje",
+        "Fin_del_viaje",
+        "Origen_Id",
+        "Destino_Id"
+      ],
+      "url": "https://www.mibici.net/site/assets/files/133188/datos_abiertos_2026_10.csv"
+    },
+    {
+      "bytes": 11813190,
+      "duplicate_rows_removed": 0,
+      "kind": "trips",
+      "max_started_at": "2026-10-31T23:59:57",
+      "min_started_at": "2026-10-01T00:00:05",
+      "month": "2026-10",
+      "path": "processed/trips_2026-10.parquet",
+      "raw_rows": 635532,
+      "rows": 635532,
+      "schema": "trip_id: int64\nstarted_at: timestamp[us]\nended_at: timestamp[us]\norigin_station_id: int64\ndestination_station_id: int64",
+      "sha256": "4e3bf2612b57b256c51fa9c6354c3d36904e31474d579bbb7149abd0a04c6d18"
+    }
+  ],
+  "manifest_version": 1,
+  "months": [
+    "2026-10"
+  ],
+  "scope": "all_stations_no_municipality_filter",
+  "source_page": "https://www.mibici.net/es/datos-abiertos/",
+  "summary": {
+    "catalog_stations": 470,
+    "duplicate_rows_removed": 0,
+    "months": 1,
+    "raw_trips": 635532,
+    "station_ids_missing_from_catalog": [
+      124
+    ],
+    "trip_stations": 470,
+    "trips": 635532
+  },
+  "time_policy": "source_naive_no_timezone_conversion",
+  "transform_version": "2",
+  "versions": {
+    "pandas": "2.3.3",
+    "pyarrow": "23.0.1"
+  }
+}

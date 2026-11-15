@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "model_a": {
+    "name": "mibici-equipo13-p1-demanda",
+    "version": "1",
+    "registered_uri": "models:/mibici-equipo13-p1-demanda/1",
+    "run_id": "65ed8a9510984cf2aedde1663050440a",
+    "git_commit": "33f9d899fd27e173624c615a808b9c629a627cfe",
+    "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+    "mlflow_training_digest": "b1788037",
+    "model_sha256": "c58b0d4c35c21f2a911ffec551da4234e798dbc96d27f69480fc9db048e00c74"
+  },
+  "historical_manifest": "references/data-manifest-2024-10_2026-09-v2.json",
+  "current_manifest": "references/data-manifest-2026-10-v2.json",
+  "current_data_version": "da76e200321e072a38a61f3b60a86df843036e4d1562e38508c385accf3d30fc",
+  "frozen_split": {
+    "validation_start": "2026-06-08",
+    "test_start": "2026-08-03",
+    "test_end_exclusive": "2026-09-28",
+    "cohort_stations": 78,
+    "rows_by_split": {
+      "test": 624,
+      "train": 5927,
+      "validation": 609
+    }
+  },
+  "partition_digests": {
+    "reference": "477ea406d4cb42db21213190bbe728fce0cd4afea614c0f29f03a65ea0d542ee",
+    "historical_validation": "f7481c502af48c1ca4b9947f4d80738367be3139556fb0f69e17ecb7c9b6a3b0",
+    "historical_test": "ea95f2222bcfc666702a4ba785c727acebc36c2ab2c40154f51f1f1dcff95a61",
+    "current": "eea5381011e13e999d6bc3911cc29322ccf798c3845bebc0f5ece791b1045c32"
+  }
+}

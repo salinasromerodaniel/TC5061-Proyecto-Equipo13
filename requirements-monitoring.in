@@ -1,0 +1,8 @@
+# Entorno aislado de reporte; preparación/modelos usan requirements.txt.
+evidently==0.7.23
+pandas==2.3.3
+pyarrow==23.0.1
+numpy==2.3.5
+scikit-learn==1.9.1
+matplotlib==3.11.0
+pytest==9.0.2
