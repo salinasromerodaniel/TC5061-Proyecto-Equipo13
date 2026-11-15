@@ -1,0 +1,9 @@
+{
+  "name": "mibici-equipo13-p1-demanda",
+  "version": "1",
+  "registered_uri": "models:/mibici-equipo13-p1-demanda/1",
+  "run_id": "01ec9f77835b4cf38601ef75cfd2375f",
+  "git_commit": "0260f9067a427f1ce079b5aa2a3a525ba38df279",
+  "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+  "model_sha256": "bd8bb2815437b744a33a92628fc61452332a4d37763cc8a1b723b62aaf4897ae"
+}
