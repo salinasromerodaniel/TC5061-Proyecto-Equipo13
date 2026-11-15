@@ -24,6 +24,22 @@ EXPERIMENT = "mibici-equipo13-p1-ab"
 DEFAULT_OUTPUT = config.DATA_DIR / "monitoring/ab"
 
 
+def ab_experiment_id():
+    """Resolver el experimento sin cambiar el entorno de los procesos hijos."""
+    import mlflow
+    from mlflow.exceptions import MlflowException
+
+    experiment = mlflow.get_experiment_by_name(EXPERIMENT)
+    if experiment is not None:
+        return experiment.experiment_id
+    try:
+        return mlflow.create_experiment(EXPERIMENT)
+    except MlflowException as error:
+        if error.error_code != "RESOURCE_ALREADY_EXISTS":
+            raise
+        return mlflow.get_experiment_by_name(EXPERIMENT).experiment_id
+
+
 def load_frozen_data(data_dir):
     parts, contract = load_partitions(data_dir)
     frozen = json.loads(PUBLIC_CONTRACT.read_text(encoding="utf-8"))
@@ -106,8 +122,7 @@ def log_challenger(reference, validation, contract):
         example = X_train.head(3)
         signature = infer_signature(example, selected.predict(example))
 
-    mlflow.set_experiment(EXPERIMENT)
-    with mlflow.start_run(run_name="P1_entregable8_B", tags={
+    with mlflow.start_run(experiment_id=ab_experiment_id(), run_name="P1_entregable8_B", tags={
         "question": "P1", "stage_of_work": "p1_ab_challenger", "selected_by_validation": "true",
     }):
         mlflow.log_params({**selected.get_params(), "contract_id": contract["contract_id"],
@@ -173,8 +188,8 @@ def evaluate(evaluation, contract, model_a, model_b):
 def save_evaluation(result, output):
     import mlflow
 
-    mlflow.set_experiment(EXPERIMENT)
-    with mlflow.start_run(run_name="P1_entregable8_AB", tags={"question": "P1"}):
+    with mlflow.start_run(experiment_id=ab_experiment_id(), run_name="P1_entregable8_AB",
+                          tags={"question": "P1"}):
         result["evaluation_run_id"] = mlflow.active_run().info.run_id
         mlflow.log_params({"contract_id": result["contract_id"],
                            "evaluation_rows": result["evaluation"]["rows"],

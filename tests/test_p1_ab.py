@@ -1,4 +1,5 @@
 from dataclasses import replace
+import os
 
 import pandas as pd
 import pytest
@@ -13,7 +14,8 @@ pytestmark = pytest.mark.filterwarnings(
 )
 
 
-def test_registered_challenger_and_paired_evaluation(tmp_path):
+def test_registered_challenger_and_paired_evaluation(tmp_path, monkeypatch):
+    monkeypatch.delenv("MLFLOW_EXPERIMENT_ID", raising=False)
     uri = f"sqlite:///{(tmp_path / 'registry.db').as_posix()}"
     dates = pd.date_range("2026-01-05", periods=9, freq="W-MON")
     frame = pd.DataFrame([
@@ -57,3 +59,4 @@ def test_registered_challenger_and_paired_evaluation(tmp_path):
         comparison = pd.read_csv(tmp_path / "evaluation/comparison.csv")
         assert comparison.arm.tolist() == ["A", "B"]
         assert comparison.mae.iloc[1] == 0
+        assert "MLFLOW_EXPERIMENT_ID" not in os.environ
