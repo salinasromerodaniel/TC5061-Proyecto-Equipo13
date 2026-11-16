@@ -1,0 +1,105 @@
+{
+  "contract_id": "a612f1671df82372b12a15f60135a3bdbc11f1f459909477a671272961ea6465",
+  "evaluation": {
+    "path": "current.parquet",
+    "rows": 234,
+    "stations": 78,
+    "weeks": 3,
+    "start": "2026-10-05",
+    "end_exclusive": "2026-10-26",
+    "logical_sha256": "eea5381011e13e999d6bc3911cc29322ccf798c3845bebc0f5ece791b1045c32",
+    "ordered_keys": [
+      "station_id",
+      "week_start"
+    ],
+    "ordered_keys_sha256": "e9b071b8abbac06ff9be052a1f394ca48d30969bebcceecdceb017a404f40346"
+  },
+  "models": {
+    "A": {
+      "name": "mibici-equipo13-p1-demanda",
+      "version": "1",
+      "registered_uri": "models:/mibici-equipo13-p1-demanda/1",
+      "run_id": "01ec9f77835b4cf38601ef75cfd2375f",
+      "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+      "git_commit": "0260f9067a427f1ce079b5aa2a3a525ba38df279",
+      "model_sha256": "bd8bb2815437b744a33a92628fc61452332a4d37763cc8a1b723b62aaf4897ae"
+    },
+    "B": {
+      "name": "mibici-equipo13-p1-demanda",
+      "version": "2",
+      "registered_uri": "models:/mibici-equipo13-p1-demanda/2",
+      "run_id": "923a9fdec5de4cc09fbc0969529de5c0",
+      "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+      "git_commit": "719ce952cc51b0a878deaca6da7f5cab7da1d59b",
+      "model_sha256": "232946e5ff0d42f090537ade9559e7d98007bce1a0105f15fe647786bd140897"
+    }
+  },
+  "metrics": {
+    "A": {
+      "mae": 23.623042786443868,
+      "rmse": 39.66400352710567,
+      "wape": 0.13941467873966873
+    },
+    "B": {
+      "mae": 23.94435995179561,
+      "rmse": 40.06412341501536,
+      "wape": 0.1413109767646954
+    }
+  },
+  "delta_mae_b_minus_a": 0.3213171653517435,
+  "relative_mae_improvement_pct": -1.3601853421530101,
+  "recommended_version": "1",
+  "decision_rule": "B si reduce MAE global y en cada semana, sin aumentar RMSE; si no, A.",
+  "limitation": "Comparación descriptiva offline de 3 semanas. Las observaciones de una misma semana y estación pueden estar correlacionadas.",
+  "weekly": [
+    {
+      "week_start": "2026-10-05",
+      "rows": 78,
+      "mae_a": 18.486060777160446,
+      "mae_b": 18.603985645730784,
+      "delta_mae_b_minus_a": 0.11792486857033779
+    },
+    {
+      "week_start": "2026-10-12",
+      "rows": 78,
+      "mae_a": 25.709472496849198,
+      "mae_b": 25.38851898712187,
+      "delta_mae_b_minus_a": -0.32095350972732817
+    },
+    {
+      "week_start": "2026-10-19",
+      "rows": 78,
+      "mae_a": 26.673595085321967,
+      "mae_b": 27.84057522253417,
+      "delta_mae_b_minus_a": 1.166980137212203
+    }
+  ],
+  "baseline_provenance": {
+    "kind": "delivery4-local-reproduction",
+    "original_contract_a": {
+      "name": "mibici-equipo13-p1-demanda",
+      "version": "1",
+      "registered_uri": "models:/mibici-equipo13-p1-demanda/1",
+      "run_id": "65ed8a9510984cf2aedde1663050440a",
+      "git_commit": "33f9d899fd27e173624c615a808b9c629a627cfe",
+      "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3",
+      "mlflow_training_digest": "b1788037",
+      "model_sha256": "c58b0d4c35c21f2a911ffec551da4234e798dbc96d27f69480fc9db048e00c74"
+    },
+    "historical_prediction_check": {
+      "reference": {
+        "rows": 5927,
+        "max_abs_prediction_difference": 0.0
+      },
+      "historical_validation": {
+        "rows": 609,
+        "max_abs_prediction_difference": 0.0
+      },
+      "historical_test": {
+        "rows": 624,
+        "max_abs_prediction_difference": 0.0
+      }
+    }
+  },
+  "evaluation_run_id": "64fa905c62614b2fba53410ce291ac47"
+}

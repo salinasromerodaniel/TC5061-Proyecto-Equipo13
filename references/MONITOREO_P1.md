@@ -96,6 +96,58 @@ Conservamos MAE como métrica principal y RMSE/WAPE como auxiliares, reutilizand
 El segundo integrante implementa entrenamiento/registro/comparación; el tercero
 consume los resultados de este reporte y de A/B para interpretación y recomendación.
 
+## Entrenamiento alternativo y A/B offline
+
+Desde la raíz del repositorio y con el entorno principal de Python 3.12,
+prepara o recupera las cuatro particiones con su `metadata.json`. Configura
+`MLFLOW_TRACKING_URI` con el servidor que contiene el A fijado. Ambos comandos
+comprueban el contrato público y la identidad de A, incluido el SHA-256 de su
+archivo `model.skops`.
+
+```powershell
+$env:MLFLOW_TRACKING_URI = "http://DIRECCION-DEL-REGISTRY:5013"
+python -m mibici.p1_ab train
+# Sustituye 2 por la versión numérica que devuelve train.
+python -m mibici.p1_ab compare --version-b 2
+```
+
+`train` ajusta dos HGB Poisson (15 y 31 hojas) con `reference` y elige el de
+menor MAE en `historical_validation`. Conserva los demás hiperparámetros de P1
+y registra el candidato bajo el mismo nombre que A. MLflow guarda los resultados
+de selección, la configuración y el contrato. El Registry asigna el número de
+versión. Guarda ese número para repetir la comparación.
+
+`compare` carga por número ambas versiones y les entrega las mismas filas de
+`current`, en el orden fijado. Los resultados quedan en MLflow y en
+`data/monitoring/ab/`. `comparison.csv` permite copiar la tabla al PDF
+(WAPE expresado como proporción), `weekly.csv` muestra el MAE por semana y
+`results.json` incluye el linaje, los hashes y la recomendación.
+
+La regla propone B si reduce el MAE global y el de cada semana, sin aumentar
+el RMSE global. En otro caso recomienda conservar A. Es una regla descriptiva
+y conservadora para tres semanas con estaciones repetidas. La recomendación
+no cambia la versión de la API ni los aliases del Registry.
+
+La ejecución de este bloque usó el Registry local de la entrega Docker,
+con la versión 1 del run `01ec9f77835b4cf38601ef75cfd2375f`.
+El A original del protocolo y la reproducción local están identificados
+por separado en el resultado. Ambos corresponden a P1 con siete hojas
+y al mismo histórico. Antes de comparar, se reprodujeron las predicciones
+del A local sobre los tres conjuntos históricos. El contrato de datos
+publicado, incluida la reserva de octubre, es el mismo en ambos casos.
+
+Para reproducir esta variante, apunta al Registry documentado de la
+entrega Docker y selecciona la identidad local de forma explícita:
+
+```powershell
+python -m mibici.p1_ab --baseline delivery4-local train
+python -m mibici.p1_ab --baseline delivery4-local compare --version-b 2
+```
+
+La opción predeterminada sigue verificando el run original del protocolo.
+Los resultados de la ejecución local, con la tabla y el desglose semanal,
+están en [reports/monitoring/ab-local](../reports/monitoring/ab-local/README.md).
+
 Los hashes lógicos fijan contenido y orden con fechas ISO, NaN explícitos y nueve
 decimales para variables flotantes. Absorben diferencias de serialización de Parquet
 y redondeo de plataforma; no redondeamos las variables que recibe el modelo.
