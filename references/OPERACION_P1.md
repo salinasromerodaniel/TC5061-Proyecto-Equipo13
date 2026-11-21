@@ -26,6 +26,8 @@ docker compose up --build -d --wait --wait-timeout 240
 Con esos requisitos preparados, el mismo comando construye la imagen, crea
 red/volúmenes, inicia MLflow, importa el modelo y espera a que la API esté disponible.
 El build de Compose funciona sin modelos en el checkout: usa la etapa `services`.
+Sólo el servicio API define el build; los otros tres reutilizan esa misma imagen
+y no la construyen en paralelo bajo una etiqueta compartida.
 Si falta la fuente o el hash no coincide, el inicializador falla y la API no arranca.
 No sustituimos silenciosamente el modelo por un ejemplo.
 

@@ -1,12 +1,7 @@
 name: mibici-equipo13-operation
 x-runtime: &runtime
   image: ${MIBICI_IMAGE:-mibici-p1:operation}
-  build:
-    context: .
-    dockerfile: Containerfile
-    target: services
-    args:
-      VCS_REF: ${MIBICI_CODE_REVISION:-working-tree}
+  pull_policy: never
   environment: &environment
     MLFLOW_DISABLE_AGENT_HINT: "1"
     MLFLOW_SERVER_ENABLE_JOB_EXECUTION: "false"
@@ -88,6 +83,12 @@ services:
 
   api:
     <<: *runtime
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: services
+      args:
+        VCS_REF: ${MIBICI_CODE_REVISION:-working-tree}
     environment:
       <<: *environment
       MIBICI_MODEL_DIR: /models/p1
