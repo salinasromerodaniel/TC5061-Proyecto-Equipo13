@@ -2,6 +2,8 @@
 **
 !Containerfile
 !requirements.txt
+!examples/
+!examples/p1-predict.json
 !mibici/
 !mibici/**
 !models/

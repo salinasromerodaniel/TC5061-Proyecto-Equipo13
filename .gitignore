@@ -235,3 +235,6 @@ nomenclatura_*.csv
 
 # Entorno aislado de monitoreo
 /.venv-monitoring/
+
+# Evidencia efímera del pipeline (se conserva en artifacts de GitHub).
+/reports/operation/ci-*
