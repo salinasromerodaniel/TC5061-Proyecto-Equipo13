@@ -1,0 +1,34 @@
+{
+  "health": {
+    "status": "ok",
+    "model": {
+      "name": "mibici-equipo13-p1-demanda",
+      "version": "1",
+      "run_id": "5c3b2d2efb1043468ced430102f2031a",
+      "git_commit": "33f9d899fd27e173624c615a808b9c629a627cfe",
+      "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+    }
+  },
+  "prediction": {
+    "predictions": [
+      97.32063540421066,
+      40.5381610212305
+    ],
+    "model": {
+      "name": "mibici-equipo13-p1-demanda",
+      "version": "1",
+      "run_id": "5c3b2d2efb1043468ced430102f2031a",
+      "git_commit": "33f9d899fd27e173624c615a808b9c629a627cfe",
+      "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+    }
+  },
+  "source_run_id": "65ed8a9510984cf2aedde1663050440a",
+  "source_bundle_id": "1fde580808b8f8b6a5e6a9de82f4f0ae4d1b6fe630d26ba31f6d7bd8a580aaec",
+  "registered_status": "READY",
+  "imported_without_retraining": true,
+  "checked_at": "2026-11-21T18:16:41.891974+00:00",
+  "environment": "docker-compose",
+  "model_kind": "real-model",
+  "code_revision": "75fd57aa8adbdc9ad76b9f0655995d1305ac198d",
+  "load_test": false
+}
