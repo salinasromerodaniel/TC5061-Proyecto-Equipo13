@@ -487,3 +487,7 @@ Contratos por pregunta, límites, comandos y evidencia solicitada en [references
 ## Monitoreo y drift P1 — Entregable 8
 
 Preparamos la referencia original y octubre de 2026 con cortes congelados y una reserva actual común para A/B. Los comandos, contrato, entorno Evidently y responsabilidades de los bloques siguientes están en [MONITOREO_P1.md](references/MONITOREO_P1.md). El [reporte HTML](reports/monitoring/p1/evidently.html), [resumen](reports/monitoring/p1/summary.json) y [figura](reports/monitoring/p1/drift-quality.png) provienen de la ejecución real. Entrenamiento B, comparación e interpretación final se completan en sus bloques.
+
+## Operación con Compose y CI/CD
+
+API y MLflow se levantan con `docker compose up --build -d --wait --wait-timeout 240` una vez indicada una fuente accesible del modelo. La imagen Compose se construye sin modelos en Git; el inicializador importa el modelo verificado y preserva su linaje. Consulte [OPERACION_P1.md](references/OPERACION_P1.md) para configuración, volúmenes, puertos, comandos, alcance de CI y entrega a las pruebas de carga. API: http://127.0.0.1:8014; MLflow: http://127.0.0.1:5014.

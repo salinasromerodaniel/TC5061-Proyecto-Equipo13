@@ -1,0 +1,50 @@
+{
+  "code_revision": "75fd57aa8adbdc9ad76b9f0655995d1305ac198d",
+  "docker_version": "28.5.2",
+  "compose_version": "2.40.3-desktop.1",
+  "image_id": "sha256:3891125a2dfd6a586c5b767d6304ec919fdd556bfd76d2319c3ffc31417ee604",
+  "image_revision": "75fd57aa8adbdc9ad76b9f0655995d1305ac198d",
+  "image_architecture": "arm64",
+  "services": [
+    {
+      "service": "api",
+      "status": "running",
+      "exit_code": 0,
+      "health": "healthy",
+      "restart_count": 0,
+      "user": "10001:10001"
+    },
+    {
+      "service": "mlflow",
+      "status": "running",
+      "exit_code": 0,
+      "health": "healthy",
+      "restart_count": 0,
+      "user": "10001:10001"
+    },
+    {
+      "service": "model-init",
+      "status": "exited",
+      "exit_code": 0,
+      "health": null,
+      "restart_count": 0,
+      "user": "10001:10001"
+    },
+    {
+      "service": "volume-init",
+      "status": "exited",
+      "exit_code": 0,
+      "health": null,
+      "restart_count": 0,
+      "user": "0:0"
+    }
+  ],
+  "persistent_identity_and_predictions": true,
+  "source_model_unchanged": true,
+  "local_tests": {
+    "passed": 144,
+    "skipped": 7,
+    "subtests_passed": 2
+  },
+  "load_test": false
+}

@@ -1,0 +1,117 @@
+name: mibici-equipo13-operation
+x-runtime: &runtime
+  image: ${MIBICI_IMAGE:-mibici-p1:operation}
+  pull_policy: never
+  environment: &environment
+    MLFLOW_DISABLE_AGENT_HINT: "1"
+    MLFLOW_SERVER_ENABLE_JOB_EXECUTION: "false"
+    OMP_NUM_THREADS: "1"
+    OPENBLAS_NUM_THREADS: "1"
+
+services:
+  volume-init:
+    <<: *runtime
+    user: "0:0"
+    command: ["python", "-m", "mibici.operations", "volumes"]
+    network_mode: none
+    volumes:
+      - tracking:/state
+      - model:/models
+    restart: "no"
+
+  mlflow:
+    <<: *runtime
+    command:
+      - python
+      - -m
+      - mlflow
+      - server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5000"
+      - --workers
+      - "1"
+      - --backend-store-uri
+      - sqlite:////state/mlflow.db
+      - --serve-artifacts
+      - --artifacts-destination
+      - /state/artifacts
+      - --allowed-hosts
+      - "mlflow:5000,localhost:*,127.0.0.1:*,host.docker.internal:*"
+    depends_on:
+      volume-init:
+        condition: service_completed_successfully
+    volumes:
+      - tracking:/state
+    ports:
+      - "${MIBICI_BIND_ADDRESS:-127.0.0.1}:${MIBICI_MLFLOW_PORT:-5014}:5000"
+    networks: [operation]
+    cpus: ${MIBICI_MLFLOW_CPUS:-1.0}
+    mem_limit: ${MIBICI_MLFLOW_MEMORY:-1g}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+
+  model-init:
+    <<: *runtime
+    command: ["python", "-m", "mibici.operations", "provision"]
+    environment:
+      <<: *environment
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MIBICI_SOURCE_REGISTRY: ${MIBICI_SOURCE_REGISTRY:-}
+      MIBICI_SOURCE_MODEL_NAME: ${MIBICI_SOURCE_MODEL_NAME:-mibici-equipo13-p1-demanda}
+      MIBICI_SOURCE_MODEL_VERSION: ${MIBICI_SOURCE_MODEL_VERSION:-1}
+      MIBICI_EXPECTED_MODEL_SHA256: ${MIBICI_EXPECTED_MODEL_SHA256:-c58b0d4c35c21f2a911ffec551da4234e798dbc96d27f69480fc9db048e00c74}
+      MIBICI_CODE_REVISION: ${MIBICI_CODE_REVISION:-working-tree}
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    volumes:
+      - model:/models
+      - type: bind
+        source: ${MIBICI_SOURCE_BUNDLE:-./models/serving/p1}
+        target: /import/p1
+        read_only: true
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    networks: [operation]
+    restart: "no"
+
+  api:
+    <<: *runtime
+    build:
+      context: .
+      dockerfile: Containerfile
+      target: services
+      args:
+        VCS_REF: ${MIBICI_CODE_REVISION:-working-tree}
+    environment:
+      <<: *environment
+      MIBICI_MODEL_DIR: /models/p1
+    depends_on:
+      model-init:
+        condition: service_completed_successfully
+    volumes:
+      - model:/models:ro
+    ports:
+      - "${MIBICI_BIND_ADDRESS:-127.0.0.1}:${MIBICI_API_PORT:-8014}:8000"
+    networks: [operation]
+    cpus: ${MIBICI_API_CPUS:-1.0}
+    mem_limit: ${MIBICI_API_MEMORY:-512m}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped
+
+networks:
+  operation:
+volumes:
+  tracking:
+  model:
