@@ -2,6 +2,9 @@
 
 Proyecto integrador de TC5061: demanda semanal P1, riesgo indirecto P2 y agrupación de estaciones P3. Repositorio público: https://github.com/salinasromerodaniel/TC5061-Proyecto-Equipo13.
 
+Pruebas de carga y recursos de la API P1 con Locust y docker stats:
+[preparación, ejecución y lectura de métricas](references/CARGA_RECURSOS_P1.md).
+
 ## Entrega 4 · API de demanda semanal P1 con Docker
 
 La API estima los viajes iniciados por estación de Zapopan durante la siguiente
