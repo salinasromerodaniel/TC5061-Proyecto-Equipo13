@@ -4,6 +4,7 @@ Proyecto integrador de TC5061: demanda semanal P1, riesgo indirecto P2 y agrupac
 
 Pruebas de carga y recursos de la API P1 con Locust y docker stats:
 [preparación, ejecución y lectura de métricas](references/CARGA_RECURSOS_P1.md).
+[Resultados reales del 22 de noviembre de 2026 y gráficas](reports/load/2026-11-22/README.md).
 
 ## Entrega 4 · API de demanda semanal P1 con Docker
 

@@ -1,0 +1,230 @@
+{
+  "started_at": "2026-11-22T18:45:06.358713+00:00",
+  "code_revision": "009c153283a1f5aa79007cecc82fb2e3e58d89dd",
+  "source_sha256": {
+    "load/locustfile.py": "d79ee32ad421156f3628c3b3261acc3f9adef96b2d427a1555188494d6dcf917",
+    "scripts/run_load.py": "118a4fd5a3d6ba19e4151859ebded8a5be296f95401433dcdd6c7cc67c31fac9",
+    "scripts/summarize_load.py": "1409775708d0bad6cbfa2bb27693d3a15007b6995857cbb4ec9cca50ca4c1ed7"
+  },
+  "host": {
+    "system": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.15",
+    "cpu_model": "AMD Ryzen 7 5700G with Radeon Graphics",
+    "logical_cpus": 8,
+    "memory_bytes": 14597873664,
+    "docker_info": 8
+  },
+  "tools": {
+    "docker": "29.8.1",
+    "compose": "5.5.1",
+    "packages": [
+      "bidict==0.24.1",
+      "blinker==1.9.0",
+      "brotli==1.2.1",
+      "certifi==2026.11.20",
+      "charset-normalizer==3.5.2",
+      "click==8.5.1",
+      "ConfigArgParse==1.10.2",
+      "contourpy==1.4.0",
+      "cycler==0.12.1",
+      "Flask==3.1.3",
+      "flask-cors==6.0.5",
+      "Flask-Login==0.6.3",
+      "fonttools==4.68.0",
+      "gevent==26.9.0",
+      "geventhttpclient==2.6.2",
+      "greenlet==3.5.6",
+      "h11==0.16.0",
+      "idna==3.20",
+      "iniconfig==2.3.1",
+      "itsdangerous==2.2.0",
+      "Jinja2==3.1.6",
+      "kiwisolver==1.5.1",
+      "locust==2.47.0",
+      "MarkupSafe==3.0.4",
+      "matplotlib==3.11.2",
+      "msgpack==1.2.4",
+      "numpy==2.5.5",
+      "packaging==26.3",
+      "pillow==13.0.0",
+      "pluggy==1.7.0",
+      "psutil==7.2.2",
+      "Pygments==2.21.0",
+      "pyparsing==3.3.3",
+      "pytest==9.2.0",
+      "python-dateutil==4.0.0",
+      "python-engineio==4.15.1",
+      "python-socketio==5.18.1",
+      "pyzmq==27.3.0",
+      "requests==2.34.2",
+      "simple-websocket==1.1.0",
+      "tzdata==2026.6",
+      "urllib3==2.8.0",
+      "websocket-client==1.9.2",
+      "Werkzeug==3.1.9",
+      "wsproto==1.3.2",
+      "zope.event==6.2",
+      "zope.interface==8.7"
+    ]
+  },
+  "api_url": "http://127.0.0.1:8014",
+  "project": "mibici-load-e13",
+  "preflight": {
+    "health": {
+      "status": "ok",
+      "model": {
+        "name": "mibici-equipo13-p1-demanda",
+        "version": "1",
+        "run_id": "c10132c1778940da8313bf447c6dcaab",
+        "git_commit": "0260f9067a427f1ce079b5aa2a3a525ba38df279",
+        "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+      }
+    },
+    "prediction": {
+      "predictions": [
+        97.32063540421066,
+        40.5381610212305
+      ],
+      "model": {
+        "name": "mibici-equipo13-p1-demanda",
+        "version": "1",
+        "run_id": "c10132c1778940da8313bf447c6dcaab",
+        "git_commit": "0260f9067a427f1ce079b5aa2a3a525ba38df279",
+        "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+      }
+    },
+    "source_run_id": "01ec9f77835b4cf38601ef75cfd2375f",
+    "source_bundle_id": "7eb7adf3b32535c60fd64b98c2c3d5fe841efcd8b6ddb646f4edc1dc40aef5a5",
+    "registered_status": "READY",
+    "imported_without_retraining": true
+  },
+  "containers_before": {
+    "api": {
+      "id": "59d6efd4e997145a81db91843cee54e4131768ad3f2850d44142c8b72e132fd4",
+      "image_id": "sha256:52cafbcf83358262f8255118f82c63412f475236ea979c02e03dfe6ee925f6b3",
+      "name": "/mibici-load-e13-api-1",
+      "image_revision": "f11945be5775d16cfb698d7613945951005396f1",
+      "state": {
+        "Status": "running",
+        "OOMKilled": false,
+        "ExitCode": 0
+      },
+      "restart_count": 0,
+      "limits": {
+        "NanoCpus": 1000000000,
+        "Memory": 536870912
+      }
+    },
+    "mlflow": {
+      "id": "ab0be1b3df34f4931dd6a078b153cbe5f8e7c3c909d7cc791155d1876e36864d",
+      "image_id": "sha256:52cafbcf83358262f8255118f82c63412f475236ea979c02e03dfe6ee925f6b3",
+      "name": "/mibici-load-e13-mlflow-1",
+      "image_revision": "f11945be5775d16cfb698d7613945951005396f1",
+      "state": {
+        "Status": "running",
+        "OOMKilled": false,
+        "ExitCode": 0
+      },
+      "restart_count": 0,
+      "limits": {
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824
+      }
+    }
+  },
+  "batch_size": 2,
+  "payload_sha256": "31174f9764a770ea45696b7c580b11231a535c0aeb4e6b0a25836168bde20d10",
+  "protocol": "closed_loop_no_think_time_includes_ramp_5s; generator shares WSL host",
+  "scenarios": {
+    "01-users1": {
+      "users": 1,
+      "run_time_seconds": 90,
+      "spawn_rate": 1,
+      "started_at_unix": 1795373150.2136397,
+      "finished_at_unix": 1795373246.2427385,
+      "exit_code": 0
+    },
+    "02-users10": {
+      "users": 10,
+      "run_time_seconds": 90,
+      "spawn_rate": 2,
+      "started_at_unix": 1795373251.245607,
+      "finished_at_unix": 1795373347.2727306,
+      "exit_code": 0
+    },
+    "03-users50": {
+      "users": 50,
+      "run_time_seconds": 90,
+      "spawn_rate": 10,
+      "started_at_unix": 1795373352.2755008,
+      "finished_at_unix": 1795373448.3045402,
+      "exit_code": 0
+    }
+  },
+  "idle_start": 1795373110.1970704,
+  "idle_end": 1795373130.1971846,
+  "postflight": {
+    "health": {
+      "status": "ok",
+      "model": {
+        "name": "mibici-equipo13-p1-demanda",
+        "version": "1",
+        "run_id": "c10132c1778940da8313bf447c6dcaab",
+        "git_commit": "0260f9067a427f1ce079b5aa2a3a525ba38df279",
+        "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+      }
+    },
+    "prediction": {
+      "predictions": [
+        97.32063540421066,
+        40.5381610212305
+      ],
+      "model": {
+        "name": "mibici-equipo13-p1-demanda",
+        "version": "1",
+        "run_id": "c10132c1778940da8313bf447c6dcaab",
+        "git_commit": "0260f9067a427f1ce079b5aa2a3a525ba38df279",
+        "data_version": "6622c0fec77e6e66f2bdb91f5761af0a792c7d3ce19591d35afc2f842a2ff9a3"
+      }
+    },
+    "source_run_id": "01ec9f77835b4cf38601ef75cfd2375f",
+    "source_bundle_id": "7eb7adf3b32535c60fd64b98c2c3d5fe841efcd8b6ddb646f4edc1dc40aef5a5",
+    "registered_status": "READY",
+    "imported_without_retraining": true
+  },
+  "containers_after": {
+    "api": {
+      "id": "59d6efd4e997145a81db91843cee54e4131768ad3f2850d44142c8b72e132fd4",
+      "image_id": "sha256:52cafbcf83358262f8255118f82c63412f475236ea979c02e03dfe6ee925f6b3",
+      "name": "/mibici-load-e13-api-1",
+      "image_revision": "f11945be5775d16cfb698d7613945951005396f1",
+      "state": {
+        "Status": "running",
+        "OOMKilled": false,
+        "ExitCode": 0
+      },
+      "restart_count": 0,
+      "limits": {
+        "NanoCpus": 1000000000,
+        "Memory": 536870912
+      }
+    },
+    "mlflow": {
+      "id": "ab0be1b3df34f4931dd6a078b153cbe5f8e7c3c909d7cc791155d1876e36864d",
+      "image_id": "sha256:52cafbcf83358262f8255118f82c63412f475236ea979c02e03dfe6ee925f6b3",
+      "name": "/mibici-load-e13-mlflow-1",
+      "image_revision": "f11945be5775d16cfb698d7613945951005396f1",
+      "state": {
+        "Status": "running",
+        "OOMKilled": false,
+        "ExitCode": 0
+      },
+      "restart_count": 0,
+      "limits": {
+        "NanoCpus": 1000000000,
+        "Memory": 1073741824
+      }
+    }
+  },
+  "finished_at": "2026-11-22T18:50:54.495203+00:00"
+}
