@@ -1,0 +1,4 @@
+# Entorno aislado del generador de carga y sus gráficas.
+locust==2.47.0
+matplotlib==3.11.2
+psutil==7.2.2
